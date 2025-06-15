@@ -11,9 +11,8 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Krallık Oyunu',
+  Widget build(BuildContext context) {    return MaterialApp(
+      title: 'Lord Simulator',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
@@ -481,14 +480,19 @@ class _StartScreenState extends State<StartScreen> {
   final MusicService _musicService = MusicService();
   bool _isMusicEnabled = true;
   bool _isSoundEnabled = true;
-
   @override
   void initState() {
     super.initState();
-    // Müziği başlat
-    _musicService.playBackgroundMusic();
+    // Müzik servisi durumunu senkronize et
     _isMusicEnabled = _musicService.isMusicEnabled;
     _isSoundEnabled = _musicService.isSoundEnabled;
+    
+    print('Uygulama başlatılıyor - Müzik: $_isMusicEnabled, Ses: $_isSoundEnabled');
+    
+    // Müziği başlat
+    if (_isMusicEnabled) {
+      _musicService.playBackgroundMusic();
+    }
   }
 
   @override
@@ -610,13 +614,13 @@ class _StartScreenState extends State<StartScreen> {
         ),
       ),
     );
-  }
-
-  void _showSettingsDialog(BuildContext context) {
+  }  void _showSettingsDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return Dialog(
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return Dialog(
           backgroundColor: Colors.transparent,
           child: Container(
             width: 320,
@@ -662,31 +666,35 @@ class _StartScreenState extends State<StartScreen> {
                   icon: Icons.music_note,
                   title: 'Müzik',
                   isToggle: true,
-                  value: _isMusicEnabled,
-                  onChanged: (value) {
+                  value: _isMusicEnabled,                  onChanged: (value) {
+                    print('Müzik toggle değiştirildi: $value');
+                    setDialogState(() {
+                      _isMusicEnabled = value;
+                    });
                     setState(() {
                       _isMusicEnabled = value;
-                      _musicService.setMusicEnabled(value);
                     });
+                    _musicService.setMusicEnabled(value);
                   },
                 ),
                 
-                const SizedBox(height: 20),
-                  // Ses Efektleri
+                const SizedBox(height: 20),                // Ses Efektleri
                 _buildSettingItem(
                   icon: Icons.volume_up,
                   title: 'Ses Efektleri',
                   isToggle: true,
-                  value: _isSoundEnabled,
-                  onChanged: (value) {
+                  value: _isSoundEnabled,                  onChanged: (value) {
+                    print('Ses efekti toggle değiştirildi: $value');
+                    setDialogState(() {
+                      _isSoundEnabled = value;
+                    });
                     setState(() {
                       _isSoundEnabled = value;
-                      _musicService.setSoundEnabled(value);
                     });
+                    _musicService.setSoundEnabled(value);
                   },
                 ),
-                
-                const SizedBox(height: 20),
+                  const SizedBox(height: 20),
                 
                 // Dil Seçimi
                 _buildSettingItem(
@@ -727,11 +735,12 @@ class _StartScreenState extends State<StartScreen> {
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
-                  ),
-                ),
+                  ),                ),
               ],
             ),
           ),
+        );
+          },
         );
       },
     );
@@ -933,13 +942,15 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   final MusicService _musicService = MusicService();
-
   @override
   void initState() {
     super.initState();
     gameState = GameState();
     _initializeEvents();
     _selectRandomEvent();
+
+    // Arka plan müziğini başlat
+    _musicService.playBackgroundMusic();
 
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 500),
@@ -1154,17 +1165,30 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         return AlertDialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
-          ),
-          title: Container(
+          ),          title: Container(
             alignment: Alignment.center,
             child: Column(
               children: [
-                Icon(
-                  Icons.warning_amber_rounded,
-                  color: Colors.red.shade600,
-                  size: 48,
+                // Yenilgi resmi ekleme - büyütülmüş
+                Container(
+                  width: 250,
+                  height: 200,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    image: const DecorationImage(
+                      image: AssetImage("city/yenilgi.jpg"),
+                      fit: BoxFit.cover,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 12,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 16),
                 const Text(
                   'Oyun Bitti!',
                   style: TextStyle(
@@ -1275,46 +1299,38 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       },
     );
   }
-
   String _getLevelUpImagePath(GovernmentLevel level) {
     switch (level) {
       case GovernmentLevel.derebeylik:
-        return "city/feudal.jpg";
+        return "city/derebeyi.jpeg";
       case GovernmentLevel.prenslik:
         return "city/baron.jpg";
       case GovernmentLevel.krallik:
-        return "city/kingdom.jpg";
+        return "city/kral.jpg";
       case GovernmentLevel.imparatorluk:
-        return "city/empire.jpg";
+        return "city/İmparator.jpg";
       default:
-        return "city/feudal.jpg"; // Varsayılan görsel
+        return "city/derebeyi.jpeg"; // Varsayılan görsel
     }
   }
-
   void _showLevelUpDialog(GovernmentLevel oldLevel, GovernmentLevel newLevel) {
-    String title = "";
     String message = "";
 
     switch (newLevel) {
       case GovernmentLevel.derebeylik:
-        title = "Tebrikler!";
         message = "Şato inşa edildi. Artık derebeyisin!";
         break;
       case GovernmentLevel.prenslik:
-        title = "Güç Artıyor!";
         message = "Barona darbe yapıldı. Yeni baron oldun!";
         break;
       case GovernmentLevel.krallik:
-        title = "Kraliyet Tacı!";
         message =
             "Diğer baronlara oybirliği ile kendini kral seçtirdin. Seçilmiş kral sensin!";
         break;
       case GovernmentLevel.imparatorluk:
-        title = "İmparatorluk!";
         message = "Bir imparatorluk devletini yıktın! Artık imparatorsun!";
         break;
       default:
-        title = "Seviye Atlandı!";
         message = "Yeni seviyeye ulaştın!";
     }
 
@@ -1325,46 +1341,38 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         return AlertDialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
-          ),
-          title: Container(
+          ),          title: Container(
             alignment: Alignment.center,
-            child: Column(
-              children: [
-                Icon(newLevel.icon, color: Colors.amber.shade700, size: 48),
-                const SizedBox(height: 8),
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.amber.shade800,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
+            child: Text(
+              newLevel.name,
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Colors.amber.shade800,
+              ),
+              textAlign: TextAlign.center,
             ),
           ),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              children: [
-                // Seviye görseli
+              children: [                // Seviye görseli - büyütülmüş
                 Container(
-                  width: 200,
-                  height: 150,
+                  width: 300,
+                  height: 250,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.amber.shade300, width: 3),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.amber.shade300, width: 4),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 12,
+                        offset: const Offset(0, 6),
                       ),
                     ],
                   ),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(9),
+                    borderRadius: BorderRadius.circular(12),
                     child: Image.asset(
                       _getLevelUpImagePath(newLevel),
                       fit: BoxFit.cover,
@@ -1380,15 +1388,15 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                             children: [
                               Icon(
                                 newLevel.icon,
-                                size: 64,
+                                size: 80,
                                 color: Colors.amber.shade700,
                               ),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: 12),
                               Text(
                                 'Görsel yüklenemedi',
                                 style: TextStyle(
                                   color: Colors.amber.shade700,
-                                  fontSize: 12,
+                                  fontSize: 14,
                                 ),
                               ),
                             ],
@@ -1465,17 +1473,30 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         return AlertDialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
-          ),
-          title: Container(
+          ),          title: Container(
             alignment: Alignment.center,
             child: Column(
               children: [
-                Icon(
-                  Icons.emoji_events,
-                  color: Colors.amber.shade600,
-                  size: 64,
+                // Başarı resmi ekleme - büyütülmüş
+                Container(
+                  width: 250,
+                  height: 200,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(16),
+                    image: DecorationImage(
+                      image: AssetImage(_getLevelUpImagePath(gameState.level)),
+                      fit: BoxFit.cover,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.3),
+                        blurRadius: 12,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 16),
                 const Text(
                   'Başarılı Emeklilik!',
                   style: TextStyle(
@@ -1499,16 +1520,15 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: Colors.green.shade300),
                   ),
-                  child: Column(
-                    children: [
+                  child: Column(                    children: [
                       Text(
-                        "Tebrikler! ${gameState.level.name} seviyesinde başarılı bir yöneticilik sergileyerek emekli oldunuz.",
+                        "${gameState.level.name} seviyesinde başarılı bir yöneticilik sergileyerek emekli oldunuz.",
                         style: const TextStyle(
                           fontSize: 16,
                           color: Colors.black87,
                         ),
                         textAlign: TextAlign.center,
-                      ),                      const SizedBox(height: 12),                        Container(
+                      ),const SizedBox(height: 12),                        Container(
                         width: double.infinity,
                         padding: const EdgeInsets.symmetric(
                           vertical: 12,
@@ -2580,10 +2600,11 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       ),
     );
   }
-
   @override
   void dispose() {
     _animationController.dispose();
+    // Müziği durdur (singleton olduğu için başka yerlerden de kontrol edilebilir)
+    _musicService.pauseBackgroundMusic();
     super.dispose();
   }
 

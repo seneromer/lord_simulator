@@ -1,5 +1,5 @@
-name: deneme
-description: "A new Flutter project."
+name: lord_simulator
+description: "Lord Simulator - Krallık Yönetim Oyunu"
 publish_to: 'none'
 
 version: 1.0.0+1
@@ -26,7 +26,8 @@ flutter:
     - city/
     - events/
     - music/
-    - city/feudal.jpg
+    - city/derebeyi.jpeg
     - city/baron.jpg
-    - city/kingdom.jpg
-    - city/empire.jpg
+    - city/kral.jpg
+    - city/İmparator.jpg
+    - city/yenilgi.jpg
