@@ -1,0 +1,37 @@
+# Event Images Placeholder
+
+Bu klasör olay resimlerini içerir. Aşağıdaki resimleri ekleyebilirsiniz:
+
+## Önerilen Event Resimleri:
+
+### Ekonomi Olayları:
+- trade.jpg - Ticaret olayları için
+- harvest.jpg - Hasat/tarım olayları için  
+- tax.jpg - Vergi olayları için
+- merchant.jpg - Tüccar olayları için
+
+### Askeri Olaylar:
+- battle.jpg - Savaş olayları için
+- fortress.jpg - Savunma olayları için
+- soldier.jpg - Asker olayları için
+- victory.jpg - Zafer olayları için
+
+### Din Olayları:
+- temple.jpg - Tapınak/din olayları için
+- priest.jpg - Din adamları için
+- ceremony.jpg - Tören olayları için
+- prayer.jpg - Dua/ibadet olayları için
+
+### Halk Olayları:
+- festival.jpg - Festival olayları için
+- people.jpg - Halk olayları için
+- market.jpg - Pazar olayları için
+- village.jpg - Köy olayları için
+
+### Diplomatik Olaylar:
+- diplomacy.jpg - Diplomasi olayları için
+- envoy.jpg - Elçi olayları için
+- treaty.jpg - Anlaşma olayları için
+- meeting.jpg - Toplantı olayları için
+
+Bu resimleri 400x300 piksel boyutunda JPG formatında eklemeniz önerilir.

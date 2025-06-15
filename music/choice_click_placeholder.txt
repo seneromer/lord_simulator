@@ -1,0 +1,2 @@
+# Placeholder for choice click sound effect
+# This is a placeholder file. Replace with actual choice_click.mp3 sound file.
