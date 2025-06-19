@@ -1,2 +1,0 @@
-# Placeholder for background music
-# This is a placeholder file. Replace with actual background.mp3 music file.

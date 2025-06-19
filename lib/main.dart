@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'package:audioplayers/audioplayers.dart';
 import 'game_data.dart';
-import 'music_service.dart';
+
+// Global ayar değişkenleri
+bool globalMusicEnabled = true;
+bool globalSoundEnabled = true;
 
 void main() {
   runApp(const MyApp());
@@ -477,27 +481,23 @@ class StartScreen extends StatefulWidget {
 }
 
 class _StartScreenState extends State<StartScreen> {
-  final MusicService _musicService = MusicService();
   bool _isMusicEnabled = true;
   bool _isSoundEnabled = true;
   @override
   void initState() {
     super.initState();
-    // Müzik servisi durumunu senkronize et
-    _isMusicEnabled = _musicService.isMusicEnabled;
-    _isSoundEnabled = _musicService.isSoundEnabled;
+    // Global değişkenleri local değişkenlerle senkronize et
+    _isMusicEnabled = globalMusicEnabled;
+    _isSoundEnabled = globalSoundEnabled;
     
-    print('Uygulama başlatılıyor - Müzik: $_isMusicEnabled, Ses: $_isSoundEnabled');
-    
-    // Müziği başlat
-    if (_isMusicEnabled) {
-      _musicService.playBackgroundMusic();
-    }
+    print('Uygulama başlatılıyor');
+    Future.delayed(const Duration(milliseconds: 500), () {
+      print('🔥 APLİKASYON BAŞLATILDI');
+    });
   }
 
   @override
   void dispose() {
-    // Müzik servisi zaten singleton, dispose etmeyelim
     super.dispose();
   }
 
@@ -615,6 +615,10 @@ class _StartScreenState extends State<StartScreen> {
       ),
     );
   }  void _showSettingsDialog(BuildContext context) {
+    // Dialog açılmadan önce değerleri global değişkenlerle senkronize et
+    _isMusicEnabled = globalMusicEnabled;
+    _isSoundEnabled = globalSoundEnabled;
+    
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -658,45 +662,9 @@ class _StartScreenState extends State<StartScreen> {
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 2,
-                  ),
-                ),
+                  ),                ),
                 const SizedBox(height: 30),
-                  // Müzik Ayarı
-                _buildSettingItem(
-                  icon: Icons.music_note,
-                  title: 'Müzik',
-                  isToggle: true,
-                  value: _isMusicEnabled,                  onChanged: (value) {
-                    print('Müzik toggle değiştirildi: $value');
-                    setDialogState(() {
-                      _isMusicEnabled = value;
-                    });
-                    setState(() {
-                      _isMusicEnabled = value;
-                    });
-                    _musicService.setMusicEnabled(value);
-                  },
-                ),
-                
-                const SizedBox(height: 20),                // Ses Efektleri
-                _buildSettingItem(
-                  icon: Icons.volume_up,
-                  title: 'Ses Efektleri',
-                  isToggle: true,
-                  value: _isSoundEnabled,                  onChanged: (value) {
-                    print('Ses efekti toggle değiştirildi: $value');
-                    setDialogState(() {
-                      _isSoundEnabled = value;
-                    });
-                    setState(() {
-                      _isSoundEnabled = value;
-                    });
-                    _musicService.setSoundEnabled(value);
-                  },
-                ),
-                  const SizedBox(height: 20),
-                
-                // Dil Seçimi
+                  // Dil Seçimi
                 _buildSettingItem(
                   icon: Icons.language,
                   title: 'Dil',
@@ -706,8 +674,42 @@ class _StartScreenState extends State<StartScreen> {
                     _showLanguageDialog(context);
                   },
                 ),
-                
-                const SizedBox(height: 30),
+
+                const SizedBox(height: 20),                // Müzik Toggle
+                _buildSettingItem(
+                  icon: Icons.music_note,
+                  title: 'Müzik',
+                  isToggle: true,
+                  value: _isMusicEnabled,                  onChanged: (value) {
+                    setState(() {
+                      _isMusicEnabled = value;
+                      globalMusicEnabled = value;
+                    });
+                    setDialogState(() {
+                      _isMusicEnabled = value;
+                    });
+                    // Müzik durumunu hemen kontrol et
+                    _handleMusicToggle(value);
+                  },
+                ),
+
+                const SizedBox(height: 20),
+
+                // Ses Efektleri Toggle
+                _buildSettingItem(
+                  icon: Icons.volume_up,
+                  title: 'Ses Efektleri',
+                  isToggle: true,
+                  value: _isSoundEnabled,                  onChanged: (value) {
+                    setState(() {
+                      _isSoundEnabled = value;
+                      globalSoundEnabled = value;
+                    });
+                    setDialogState(() {
+                      _isSoundEnabled = value;
+                    });
+                  },
+                ),const SizedBox(height: 30),
                 
                 // Kapat Butonu
                 ElevatedButton(
@@ -795,15 +797,14 @@ class _StartScreenState extends State<StartScreen> {
                   ),
               ],
             ),
-          ),
-          if (isToggle)
+          ),          if (isToggle)
             Switch(
               value: value,
               onChanged: onChanged,
               activeColor: Colors.white,
-              activeTrackColor: Colors.white.withOpacity(0.3),
-              inactiveThumbColor: Colors.white.withOpacity(0.5),
-              inactiveTrackColor: Colors.white.withOpacity(0.1),
+              activeTrackColor: Colors.green.withOpacity(0.6),
+              inactiveThumbColor: Colors.grey.shade400,
+              inactiveTrackColor: Colors.grey.withOpacity(0.3),
             )
           else if (onTap != null)
             GestureDetector(
@@ -921,10 +922,22 @@ class _StartScreenState extends State<StartScreen> {
               Icons.check,
               color: Colors.white,
               size: 20,
-            ),
-        ],
+            ),        ],
       ),
     );
+  }
+  // Müzik toggle değiştiğinde çağrılır
+  void _handleMusicToggle(bool enabled) {
+    print('🎵 Müzik toggle değişti: $enabled');
+    print('🎵 Global müzik durumu: $globalMusicEnabled');
+    
+    if (enabled) {
+      print('🎵 Müzik açıldı - Oyun müziği başlatılıyor');
+      // TODO: GameScreen'deki müziği başlat (şimdilik sadece log)
+    } else {
+      print('🎵 Müzik kapatıldı - Oyun müziği durduruluyor');
+      // TODO: GameScreen'deki müziği durdur (şimdilik sadece log)
+    }
   }
 }
 
@@ -941,7 +954,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
   late EventCard currentEvent;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
-  final MusicService _musicService = MusicService();
+  late AnimationController _cardFlipController;
+  late Animation<double> _cardFlipAnimation;  // Sınıf seviyesinde AudioPlayer tanımlandı
+  final AudioPlayer _backgroundMusicPlayer = AudioPlayer();
+
   @override
   void initState() {
     super.initState();
@@ -949,18 +965,36 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     _initializeEvents();
     _selectRandomEvent();
 
-    // Arka plan müziğini başlat
-    _musicService.playBackgroundMusic();
-
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 500),
       vsync: this,
-    );
-    _fadeAnimation = Tween<double>(
+    );    _fadeAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
     ).animate(_animationController);
     _animationController.forward();
+    
+    // Kart flip animasyonu için
+    _cardFlipController = AnimationController(
+      duration: const Duration(milliseconds: 300),
+      vsync: this,
+    );    _cardFlipAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _cardFlipController,
+      curve: Curves.easeInOut,    ));
+    
+    // Arkaplan müziğini hemen başlat
+    _startBackgroundMusic();
+    
+    // Ayrıca biraz gecikmeli backup başlatma
+    Future.delayed(const Duration(milliseconds: 2000), () {
+      if (globalMusicEnabled && _backgroundMusicPlayer.state != PlayerState.playing) {
+        print('🔄 Backup müzik başlatma...');
+        _startBackgroundMusic();
+      }
+    });
   }
   void _initializeEvents() {
     events = GameData.getEvents();
@@ -1056,21 +1090,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         return 1.0; // Krallıkta güçlü etki
       case GovernmentLevel.imparatorluk:
         return 1.3; // İmparatorlukta en güçlü etki
-    }
-  }
-
-  void _makeChoice(Choice choice) {
-    // Önce seçimin oyun bitiş riskine sebep olup olmayacağını kontrol et
-    if (_wouldChoiceCauseGameOver(choice)) {
-      _showRiskConfirmationDialog(choice);
-      return;
-    }
-
-    _executeChoice(choice);
-  }
+    }  }
   void _executeChoice(Choice choice) {
-    // Ses efekti çal
-    _musicService.playSoundEffect('choice_click');
+   
     
     setState(() {
       // Government level'a göre ölçeklendirilmiş etkiler
@@ -1155,8 +1177,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     }
   }
   void _showGameOverDialog() {
-    // Müziği durdur
-    _musicService.stopBackgroundMusic();
+ 
     
     showDialog(
       context: context,
@@ -1245,10 +1266,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                               color: Colors.blue.shade600,
                             ),
                             textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 4),
+                          ),                          const SizedBox(height: 4),
                           Text(
-                            gameState.totalDays == 0 ? "0" : "${gameState.totalDays}",
+                            _formatTimePassed(),
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -1263,8 +1283,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                 ),
               ),
             ],
-          ),
-          actions: [            SizedBox(
+          ),          actions: [
+            // Yeniden Başla Butonu
+            SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: () {
@@ -1273,8 +1294,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                     gameState = GameState();
                     _selectRandomEvent();
                   });
-                  // Müziği yeniden başlat
-                  _musicService.playBackgroundMusic();
+      
                 },
                 icon: const Icon(Icons.refresh, color: Colors.white),
                 label: const Text(
@@ -1287,6 +1307,37 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                 ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green.shade600,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            // Ana Sayfaya Dön Butonu
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (context) => const StartScreen(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.home, color: Colors.white),
+                label: const Text(
+                  'Ana Sayfaya Dön',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue.shade600,
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -1431,8 +1482,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                 ),
               ],
             ),
-          ),
-          actions: [
+          ),          actions: [
+            // Devam Et Butonu
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
@@ -1875,8 +1926,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           requirementMessage = "Gereken: ${missing.join(', ')}";
         }
         break;
-      case GovernmentLevel.derebeylik:
-        meetsRequirements =
+      case GovernmentLevel.derebeylik:        meetsRequirements =
             gameState.halk > 30 &&
             gameState.ekonomi > 30 &&
             gameState.din > 40 &&
@@ -1891,8 +1941,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           requirementMessage = "Gereken: ${missing.join(', ')}";
         }
         break;
-      case GovernmentLevel.prenslik:
-        meetsRequirements =
+      case GovernmentLevel.prenslik:        meetsRequirements =
             gameState.ekonomi >= 60 &&
             gameState.asker >= 30 &&
             gameState.daysAtCurrentLevel >= 1095;
@@ -1903,8 +1952,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           requirementMessage = "Gereken: ${missing.join(', ')}";
         }
         break;
-      case GovernmentLevel.krallik:
-        meetsRequirements =
+      case GovernmentLevel.krallik:        meetsRequirements =
             gameState.halk >= 60 &&
             gameState.asker >= 50 &&
             gameState.daysAtCurrentLevel >= 1095;
@@ -1957,11 +2005,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     double mainPadding = screenWidth < 600 ? 12.0 : 16.0;
     double cardPadding = screenWidth < 600 ? 12.0 : 16.0;
     int eventCardFlex = screenHeight < 700 ? 3 : 2;
-    int choiceCardFlex = screenHeight < 700 ? 2 : 2;
-    
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
+    int choiceCardFlex = screenHeight < 700 ? 2 : 2;    return Scaffold(
+      body: Container(        decoration: const BoxDecoration(
           image: DecorationImage(
             image: AssetImage('card/arkaplan2.jpg'),
             fit: BoxFit.cover,
@@ -2000,14 +2045,16 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                 child: Padding(
                   padding: EdgeInsets.all(cardPadding),
                   child: FadeTransition(
-                    opacity: _fadeAnimation,
-                    child: Card(
+                    opacity: _fadeAnimation,                    child: Card(
                       elevation: 8,
                       color: Colors.black.withValues(alpha: 0.8),
                       child: Stack(
-                        children: [
-                          // Arka plan resmi (eğer varsa)
-                          if (currentEvent.imagePath.isNotEmpty)
+                        children: [                          // Arka plan resmi (eğer varsa)
+                          if (currentEvent.imagePath.isNotEmpty) ...[
+                            Builder(builder: (context) {
+                              print('🖼️ Resim yolu: ${currentEvent.imagePath}');
+                              return const SizedBox.shrink();
+                            }),
                             Positioned.fill(
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(12),
@@ -2015,18 +2062,29 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                   currentEvent.imagePath,
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) {
+                                    print('❌ Resim yüklenemiyor: ${currentEvent.imagePath}');
+                                    print('❌ Hata: $error');
                                     return Container(
                                       color: Colors.grey.shade800,
-                                      child: Icon(
-                                        Icons.image_not_supported,
-                                        color: Colors.grey.shade400,
-                                        size: 48,
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.image_not_supported,
+                                            color: Colors.grey.shade400,
+                                            size: 48,
+                                          ),
+                                          Text(
+                                            'Resim yüklenemedi',
+                                            style: TextStyle(color: Colors.grey.shade400),
+                                          ),
+                                        ],
                                       ),
                                     );
-                                  },
-                                ),
+                                  },                                ),
                               ),
                             ),
+                          ],
                           // Koyu overlay
                           Positioned.fill(
                             child: Container(
@@ -2226,8 +2284,29 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         double titleFontSize = screenWidth < 600 ? 16 : 20;
         double descriptionFontSize = screenWidth < 600 ? 14 : 17;
         double cardPadding = screenWidth < 600 ? 8.0 : 12.0; // Padding arttır
-        double containerPadding = screenWidth < 600 ? 4 : 6;        return GestureDetector(
-          onTap: () => _makeChoice(choice),          child: Card(
+        double containerPadding = screenWidth < 600 ? 4 : 6;        return MouseRegion(
+         
+          child: AnimatedBuilder(
+            animation: _cardFlipAnimation,
+            builder: (context, child) {
+              return Transform(
+                alignment: Alignment.center,
+                transform: Matrix4.identity()
+                  ..setEntry(3, 2, 0.001)
+                  ..rotateY(0.1 * _cardFlipAnimation.value),
+                child: GestureDetector(                  onTap: () async {
+                    // Kart sesi çalma fonksiyonu
+                    _playCardSound();
+                
+                    // Kart flip animasyonu çal
+                    _cardFlipController.forward().then((_) {
+                      _cardFlipController.reverse();
+                    });
+                
+                    // Seçimi gerçekleştir
+                    _executeChoice(choice);
+                  },
+            child: Card(
             elevation: 8, // Daha belirgin shadow efekti
             shadowColor: Colors.black.withOpacity(0.3),
             color: const Color(0xFFF5F5F5), // Beyazımsı gri renk
@@ -2285,13 +2364,17 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                   if (choice.halkChange != 0 ||
                       choice.dinChange != 0 ||
                       choice.askerChange != 0 ||
-                      choice.ekonomiChange != 0)
-                    Container(
+                      choice.ekonomiChange != 0)                    Container(
                       margin: EdgeInsets.only(top: screenHeight * 0.005),
                       child: _buildEffectsPreview(choice),
-                    ),                ],
+                    ),
+                ],
               ),
             ),
+          ),
+                ),
+              );
+            },
           ),
         );
       },
@@ -2599,323 +2682,141 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         ),
       ),
     );
+  }  // Kart sesi çalma fonksiyonu
+  void _playCardSound() async {
+    if (!globalSoundEnabled) return;
+    
+    try {
+      print('🔊 Kart sesi çalmaya başlıyor...');
+      print('🔊 Arkaplan müziği durumu ÖNCE: ${_backgroundMusicPlayer.state}');
+      
+      // Kart sesi için tamamen yeni ve izole AudioPlayer
+      final cardSoundPlayer = AudioPlayer();
+      
+      // Arkaplan müziğini etkilememesi için özel ayarlar
+      await cardSoundPlayer.setAudioContext(AudioContext(
+        android: AudioContextAndroid(
+          isSpeakerphoneOn: false,
+          stayAwake: false,
+          contentType: AndroidContentType.sonification,
+          usageType: AndroidUsageType.notification,
+          audioFocus: AndroidAudioFocus.none, // ÖNEMLI: Audio focus almayacak
+        ),
+        iOS: AudioContextIOS(
+          category: AVAudioSessionCategory.ambient,
+          options: {
+            AVAudioSessionOptions.mixWithOthers, // Diğer seslerle karışabilir
+          },
+        ),
+      ));
+      
+      await cardSoundPlayer.setVolume(0.7);
+      await cardSoundPlayer.play(AssetSource('music/kart_sesi.mp3'));
+      
+      print('🔊 Kart sesi başlatıldı');
+      print('🔊 Arkaplan müziği durumu SONRA: ${_backgroundMusicPlayer.state}');
+        // Ses bittikten sonra temizlik ve müzik kontrol
+      cardSoundPlayer.onPlayerComplete.listen((_) {
+        print('🔊 Kart sesi tamamlandı, player temizleniyor');
+        cardSoundPlayer.dispose();
+        
+        // Arkaplan müziğinin hala çalıp çalmadığını kontrol et
+        Future.delayed(const Duration(milliseconds: 100), () {
+          if (_backgroundMusicPlayer.state != PlayerState.playing && globalMusicEnabled) {
+            print('🎵 Arkaplan müziği kesilmiş, yeniden başlatılıyor...');
+            _backgroundMusicPlayer.resume();
+          }
+        });
+      });
+      
+      // 3 saniye sonra zorla temizlik (güvenlik için)
+      Future.delayed(const Duration(seconds: 3), () {
+        if (cardSoundPlayer.state != PlayerState.disposed) {
+          cardSoundPlayer.dispose();
+        }
+      });
+      
+    } catch (e) {
+      print('❌ Kart sesi hatası: $e');
+    }
+  }  // Arkaplan müziği başlatma fonksiyonu
+  void _startBackgroundMusic() async {
+    if (!globalMusicEnabled) {
+      print('🎵 Müzik kapalı, başlatılmadı');
+      return;
+    }
+    
+    try {
+      print('🎵 Arkaplan müziği başlatılıyor...');
+      print('🎵 GlobalMusicEnabled: $globalMusicEnabled');
+      print('🎵 Asset yolu: music/arkaplan_ses.mp3');
+      
+      // Arkaplan müziği için güçlü audio context
+      await _backgroundMusicPlayer.setAudioContext(AudioContext(
+        android: AudioContextAndroid(
+          isSpeakerphoneOn: false,
+          stayAwake: true,
+          contentType: AndroidContentType.music,
+          usageType: AndroidUsageType.media,
+          audioFocus: AndroidAudioFocus.gain, // Dominant audio focus
+        ),
+        iOS: AudioContextIOS(
+          category: AVAudioSessionCategory.playback,
+          options: {
+            AVAudioSessionOptions.mixWithOthers, // Diğer seslerle karışabilir
+          },
+        ),
+      ));
+      
+      await _backgroundMusicPlayer.setReleaseMode(ReleaseMode.loop);
+      await _backgroundMusicPlayer.setVolume(0.4);
+      await _backgroundMusicPlayer.play(AssetSource('music/arkaplan_ses.mp3'));
+      
+      print('✅ Arkaplan müziği başlatma komutu gönderildi');
+      
+      // 1 saniye sonra durumu kontrol et
+      Future.delayed(const Duration(seconds: 1), () async {
+        try {
+          PlayerState state = _backgroundMusicPlayer.state;
+          print('🎵 Müzik durumu: $state');
+          
+          if (state != PlayerState.playing) {
+            print('⚠️ Müzik çalmıyor, tekrar deneniyor...');
+            await _backgroundMusicPlayer.resume();
+          }
+        } catch (e) {
+          print('❌ Durum kontrol hatası: $e');
+        }
+      });
+      
+    } catch (e) {
+      print('❌ Arkaplan müziği hatası: $e');
+      print('❌ Hata detayı: ${e.toString()}');
+      
+      // 3 saniye sonra tekrar dene
+      Future.delayed(const Duration(seconds: 3), () {
+        print('🔄 Arkaplan müziği tekrar deneniyor...');
+        _retryBackgroundMusic();
+      });
+    }
+  }
+
+  // Arkaplan müziği yeniden deneme fonksiyonu
+  void _retryBackgroundMusic() async {
+    if (!globalMusicEnabled) return;
+    
+    try {
+      await _backgroundMusicPlayer.play(AssetSource('music/arkaplan_ses.mp3'));
+      print('✅ Arkaplan müziği yeniden deneme başarılı');
+    } catch (e) {
+      print('❌ Arkaplan müziği yeniden deneme hatası: $e');    }
   }
   @override
   void dispose() {
+    _backgroundMusicPlayer.dispose();
     _animationController.dispose();
-    // Müziği durdur (singleton olduğu için başka yerlerden de kontrol edilebilir)
-    _musicService.pauseBackgroundMusic();
+    _cardFlipController.dispose();
+  
     super.dispose();
-  }
-
-  bool _wouldChoiceCauseGameOver(Choice choice) {
-    // Government level'a göre ölçeklendirilmiş etkiler
-    double multiplier = _getEffectMultiplier();
-
-    int scaledHalkChange = (choice.halkChange * multiplier).round();
-    int scaledDinChange = (choice.dinChange * multiplier).round();
-    int scaledAskerChange = (choice.askerChange * multiplier).round();
-    int scaledEkonomiChange = (choice.ekonomiChange * multiplier).round();
-
-    // Mevcut değerleri simüle et
-    int tempHalk = gameState.halk + scaledHalkChange;
-    int tempDin = gameState.din + scaledDinChange;
-    int tempAsker = gameState.asker + scaledAskerChange;
-    int tempEkonomi = gameState.ekonomi + scaledEkonomiChange;
-
-    // Seviye bazlı maksimum değerler
-    int maxHalk, maxDin, maxAsker, maxEkonomi;
-
-    switch (gameState.level) {
-      case GovernmentLevel.koyu:
-        maxHalk = 60;
-        maxDin = 40;
-        maxAsker = 40;
-        maxEkonomi = 60;
-        break;
-      case GovernmentLevel.derebeylik:
-        maxHalk = 70;
-        maxDin = 50;
-        maxAsker = 55;
-        maxEkonomi = 70;
-        break;
-      case GovernmentLevel.prenslik:
-        maxHalk = 75;
-        maxDin = 60;
-        maxAsker = 65;
-        maxEkonomi = 80;
-        break;
-      case GovernmentLevel.krallik:
-        maxHalk = 85;
-        maxDin = 80;
-        maxAsker = 85;
-        maxEkonomi = 90;
-        break;
-      case GovernmentLevel.imparatorluk:
-        maxHalk = 100;
-        maxDin = 100;
-        maxAsker = 100;
-        maxEkonomi = 100;
-        break;
-    }
-
-    // Oyun bitiş koşullarını kontrol et (sınırlara uygulanmadan önce)
-    return (tempHalk <= 0 ||
-        tempDin <= 0 ||
-        tempAsker <= 0 ||
-        tempEkonomi <= 0 ||
-        tempHalk >= maxHalk ||
-        tempDin >= maxDin ||
-        tempAsker >= maxAsker ||
-        tempEkonomi >= maxEkonomi);
-  }  void _showRiskConfirmationDialog(Choice choice) {
-    String riskMessage = _getRiskMessage(choice);
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        double screenWidth = MediaQuery.of(context).size.width;
-        double screenHeight = MediaQuery.of(context).size.height;
-        
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          contentPadding: EdgeInsets.zero,
-          insetPadding: EdgeInsets.symmetric(
-            horizontal: screenWidth * 0.05,
-            vertical: screenHeight * 0.1,
-          ),
-          title: Container(
-            alignment: Alignment.center,
-            padding: EdgeInsets.all(screenWidth < 600 ? 12 : 16),
-            child: Column(
-              children: [
-                Icon(
-                  Icons.warning_amber_rounded,
-                  color: Colors.orange.shade600,
-                  size: screenWidth < 600 ? 40 : 48,
-                ),
-                SizedBox(height: screenWidth < 600 ? 6 : 8),
-                Text(
-                  "⚠️ Tehlikeli Karar!",
-                  style: TextStyle(
-                    fontSize: screenWidth < 600 ? 18 : 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.orange.shade700,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-          content: Container(
-            width: double.infinity,
-            constraints: BoxConstraints(
-              maxHeight: screenHeight * 0.5,
-            ),
-            child: SingleChildScrollView(
-              padding: EdgeInsets.symmetric(
-                horizontal: screenWidth < 600 ? 12 : 16,
-                vertical: screenWidth < 600 ? 8 : 12,
-              ),
-              child: Container(
-                width: double.infinity,
-                padding: EdgeInsets.all(screenWidth < 600 ? 12 : 16),
-                decoration: BoxDecoration(
-                  color: Colors.orange.shade50,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.orange.shade200),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      "Seçeceğin karar oyununun bitmesine sebep olabilir!",
-                      style: TextStyle(
-                        fontSize: screenWidth < 600 ? 14 : 16,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.orange.shade800,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: screenWidth < 600 ? 8 : 12),
-                    Text(
-                      riskMessage,
-                      style: TextStyle(
-                        fontSize: screenWidth < 600 ? 12 : 14,
-                        color: Colors.orange.shade700,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: screenWidth < 600 ? 12 : 16),
-                    Container(
-                      width: double.infinity,
-                      padding: EdgeInsets.all(screenWidth < 600 ? 8 : 12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.orange.shade300),
-                      ),
-                      child: Column(
-                        children: [
-                          Text(
-                            "Seçeceğin karar:",
-                            style: TextStyle(
-                              fontSize: screenWidth < 600 ? 10 : 12,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.grey.shade600,
-                            ),
-                          ),
-                          SizedBox(height: screenWidth < 600 ? 2 : 4),
-                          Text(
-                            choice.title,
-                            style: TextStyle(
-                              fontSize: screenWidth < 600 ? 12 : 14,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.orange.shade800,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),actions: [
-            Padding(
-              padding: EdgeInsets.all(screenWidth < 600 ? 8 : 16),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextButton(
-                      onPressed: () {
-                        Navigator.of(
-                          context,
-                        ).pop(); // Sadece popup'ı kapat, seçimi yapma
-                      },
-                      style: TextButton.styleFrom(
-                        backgroundColor: Colors.grey.shade100,
-                        padding: EdgeInsets.symmetric(
-                          vertical: screenWidth < 600 ? 8 : 12,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: Text(
-                        'İptal Et',
-                        style: TextStyle(
-                          fontSize: screenWidth < 600 ? 14 : 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.grey.shade700,
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: screenWidth < 600 ? 8 : 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop(); // Popup'ı kapat
-                        _executeChoice(choice); // Seçimi gerçekleştir
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.orange.shade600,
-                        padding: EdgeInsets.symmetric(
-                          vertical: screenWidth < 600 ? 8 : 12,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
-                      child: Text(
-                        'Devam Et',
-                        style: TextStyle(
-                          fontSize: screenWidth < 600 ? 14 : 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),                ],
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  String _getRiskMessage(Choice choice) {
-    double multiplier = _getEffectMultiplier();
-
-    int scaledHalkChange = (choice.halkChange * multiplier).round();
-    int scaledDinChange = (choice.dinChange * multiplier).round();
-    int scaledAskerChange = (choice.askerChange * multiplier).round();
-    int scaledEkonomiChange = (choice.ekonomiChange * multiplier).round();
-
-    int tempHalk = gameState.halk + scaledHalkChange;
-    int tempDin = gameState.din + scaledDinChange;
-    int tempAsker = gameState.asker + scaledAskerChange;
-    int tempEkonomi = gameState.ekonomi + scaledEkonomiChange;
-
-    List<String> risks = [];
-
-    // Seviye bazlı maksimum değerleri al
-    int maxHalk, maxDin, maxAsker, maxEkonomi;
-    switch (gameState.level) {
-      case GovernmentLevel.koyu:
-        maxHalk = 60;
-        maxDin = 40;
-        maxAsker = 40;
-        maxEkonomi = 60;
-        break;
-      case GovernmentLevel.derebeylik:
-        maxHalk = 70;
-        maxDin = 50;
-        maxAsker = 55;
-        maxEkonomi = 70;
-        break;
-      case GovernmentLevel.prenslik:
-        maxHalk = 75;
-        maxDin = 60;
-        maxAsker = 65;
-        maxEkonomi = 80;
-        break;
-      case GovernmentLevel.krallik:
-        maxHalk = 85;
-        maxDin = 80;
-        maxAsker = 85;
-        maxEkonomi = 90;
-        break;
-      case GovernmentLevel.imparatorluk:
-        maxHalk = 100;
-        maxDin = 100;
-        maxAsker = 100;
-        maxEkonomi = 100;
-        break;
-    }
-
-    if (tempHalk <= 0) risks.add("Halk ayaklanacak");
-    if (tempDin <= 0) risks.add("Din otoritesi çökecek");
-    if (tempAsker <= 0) risks.add("Ordu dağılacak");
-    if (tempEkonomi <= 0) risks.add("Ekonomi çökecek");
-
-    if (tempHalk >= maxHalk) risks.add("Halk kontrolden çıkacak");
-    if (tempDin >= maxDin) risks.add("Din adamları iktidarı ele geçirecek");
-    if (tempAsker >= maxAsker) risks.add("Ordu diktatörlük kuracak");
-    if (tempEkonomi >= maxEkonomi) {
-      risks.add("Zenginlik toplumsal dengeyi bozacak");
-    }
-
-    if (risks.isEmpty) {
-      return "Bu seçim oyun bitiş riskine sebep olabilir.";
-    }
-
-    return "Risk: ${risks.join(', ')}.";
   }
 }

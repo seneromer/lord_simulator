@@ -13,7 +13,6 @@ Lord Simulator, oyuncuların bir köy lideri olarak başlayıp imparatorluk kura
 - **Danışman Kartları**: Mali, Askeri, Dini danışmanlardan tavsiye alın
 - **Olay Sistemi**: Her olayın kendine özel süresi (günler/aylar)
 - **Responsive Tasarım**: Tüm ekran boyutlarına uyumlu modern UI
-- **Müzik & Ses**: Arka plan müziği ve ses efektleri
 - **Zincirleme Olaylar**: Kararlarınızın uzun vadeli sonuçları
 
 ### 📊 Yönetim Alanları
@@ -44,7 +43,6 @@ flutter run
 
 - **Framework**: Flutter
 - **Dil**: Dart
-- **Audio**: audioplayers paketi
 - **Platform Desteği**: Android, iOS, Web, Desktop
 - **Mimari**: State Management with StatefulWidget
 - **UI**: Material Design 3
@@ -55,12 +53,6 @@ flutter run
 - Iskambil kartı benzeri danışman kartları
 - Dramatik olay kartları
 - Responsive layout tasarımı
-
-## 🎵 Müzik ve Sesler
-
-Oyun, placeholder müzik dosyaları ile gelirir. Gerçek müzik dosyalarını `music/` klasörüne ekleyebilirsiniz:
-- `background.mp3`: Arka plan müziği
-- `choice_click.mp3`: Kart seçimi ses efekti
 
 ## 🔮 Gelecek Özellikler
 

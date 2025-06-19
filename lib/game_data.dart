@@ -12,7 +12,7 @@ class EventCard {
   EventCard({
     required this.title,
     required this.description,
-    required this.imagePath,
+    this.imagePath = "",
     required this.choices,
     required this.governmentLevels,
     this.durationInDays = 365, // Varsayılan 1 yıl (365 gün)
@@ -42,13 +42,12 @@ class Choice {
 
 // Tüm oyun olayları ve kartları
 class GameData {
-  static List<EventCard> getEvents({String? currentGovernmentLevel}) {
-    List<EventCard> allEvents = [
+  static List<EventCard> getEvents({String? currentGovernmentLevel}) {    List<EventCard> allEvents = [
       // === KÖY SEVİYESİ OLAYLARI ===
       EventCard(
         title: "Kıtlık Tehdidi",
         description: "Büyük bir kuraklık baş gösterir ve köylüler endişeli.",
-        imagePath: "events/harvest.jpg",
+        imagePath: "city/olaylar/kuraklik.jpg",
         governmentLevels: ["köy"],
         durationInDays: 90, // 3 ay süren kıtlık krizi
         choices: [
@@ -74,13 +73,11 @@ class GameData {
             halkChange: -6,
           ),
         ],
-      ),
-
-      EventCard(
+      ),      EventCard(
         title: "Köy Meydanı Yenileme",
         description:
             "Köyün merkez meydanı harap durumda ve yenilenmesi gerekiyor.",
-        imagePath: "events/festival.jpg",
+        imagePath: "city/olaylar/kopru_insasi.jpg",
         governmentLevels: ["köy"],
         durationInDays: 180, // 6 ay süren inşaat projesi
         choices: [
@@ -104,7 +101,6 @@ class GameData {
       EventCard(
         title: "Köy Okulunun Açılması",
         description: "Köy okulunun açılması için bütçe ayrılması isteniyor.",
-        imagePath: "card/village_school.jpg",
         governmentLevels: ["köy"],
         durationInDays: 365, // 1 yıl süren büyük proje
         choices: [
@@ -138,7 +134,6 @@ class GameData {
       EventCard(
         title: "Yabani Hayvan Saldırısı",
         description: "Vahşi kurtlar köylülere ve sürülerine saldırıyor.",
-        imagePath: "events/battle.jpg",
         governmentLevels: ["köy"],
         durationInDays: 45, // 1.5 ay süren acil durum
         choices: [
@@ -170,7 +165,6 @@ class GameData {
       EventCard(
         title: "Köy Çınarının Kesilmesi",
         description: "Köyün 300 yıllık çınar ağacı hasta oldu.",
-        imagePath: "card/village_tree.jpg",
         governmentLevels: ["köy"],
         choices: [
           Choice(
@@ -203,7 +197,6 @@ class GameData {
       EventCard(
         title: "Köv Festivali Organizasyonu",
         description: "Köylüler hasat festivali düzenlemek istiyor.",
-        imagePath: "card/village_festival.jpg",
         governmentLevels: ["köy"],
         durationInDays: 15, // 15 günlük festival hazırlığı
         choices: [
@@ -234,7 +227,6 @@ class GameData {
       EventCard(
         title: "Köprü Yapım İhtiyacı",
         description: "Köyü ikiye bölen dere taştığında köprü gerekiyor.",
-        imagePath: "card/village_bridge.jpg",
         governmentLevels: ["köy"],
         durationInDays: 240, // 8 ay süren inşaat projesi
         choices: [
@@ -260,7 +252,7 @@ class GameData {
             advisorType: "halk",
             halkChange: 8,
             ekonomiChange: -3,
-            askerChange: 5,
+    
           ),
         ],
       ),
@@ -268,41 +260,39 @@ class GameData {
       EventCard(
         title: "Gezgin Tüccarın Teklifi",
         description: "Gezgin tüccar köyde dükkân açmak istiyor.",
-        imagePath: "events/trade.jpg",
         governmentLevels: ["köy"],
         choices: [
           Choice(
             title: "Tüccarı Destekle",
             description: "Dükkân açmasına izin ver, vergi al",
             advisorType: "mali",
-            ekonomiChange: 10,
-            halkChange: 8,
-            dinChange: -3,
+            ekonomiChange: 6,
+            halkChange: 4,
+            
           ),
           Choice(
             title: "Sadece Pazar Kurmasına İzin Ver",
             description: "Haftada bir pazar kurmasına izin ver",
             advisorType: "halk",
-            halkChange: 12,
-            ekonomiChange: 5,
-            dinChange: 3,
+            halkChange: 2,
+            ekonomiChange: 4,
+            
           ),
           Choice(
             title: "Yabancıları İstemem",
             description: "Köye yabancı tüccar istemiyoruz",
             advisorType: "din",
             dinChange: 8,
-            halkChange: -5,
-            askerChange: 5,
+            halkChange: -4,
+            
           ),
-        ],
-      ),
+        ],      ),
 
       // === DEREBEYLİK SEVİYESİ OLAYLARI ===
       EventCard(
         title: "Din Adamlarının İsyanı",
         description: "Din adamları toplanıp liderliğinizi sorguluyorlar.",
-        imagePath: "events/temple.jpg",
+        imagePath: "city/olaylar/din_adamlari_isyani.jpg",
         governmentLevels: ["derebeylik"],
         durationInDays: 120, // 4 ay süren politik kriz
         choices: [
@@ -310,17 +300,17 @@ class GameData {
             title: "Tam İtaat",
             description: "Din adamlarının isteklerini kabul et",
             advisorType: "din",
-            dinChange: 9,
-            halkChange: -9,
-            ekonomiChange: -8,
+            dinChange: 7,
+            halkChange: -3,
+            askerChange: -5,
           ),
           Choice(
             title: "Güç Gösterisi",
             description: "Ordu ile isyanı bastır",
             advisorType: "askeri",
-            askerChange: 9,
-            dinChange: -9,
-            halkChange: -5,
+            askerChange: 6,
+            dinChange: -7,
+            halkChange: -3,
           ),
           Choice(
             title: "Laik Yönetim",
@@ -337,7 +327,6 @@ class GameData {
       EventCard(
         title: "Sınır Anlaşmazlığı",
         description: "Komşu derebeyiyle aranızda sınır anlaşmazlığı çıktı.",
-        imagePath: "events/diplomacy.jpg",
         governmentLevels: ["derebeylik"],
         choices: [
           Choice(
@@ -371,7 +360,6 @@ class GameData {
       EventCard(
         title: "Kristal Madeni Keşfi",
         description: "Dağlarda değerli kristal madeni bulundu.",
-        imagePath: "card/crystal_mine.jpg",
         governmentLevels: ["baronluk"],
         choices: [
           Choice(
@@ -386,7 +374,7 @@ class GameData {
             title: "Kristalleri Kutsal İlan Et",
             description: "Tapınağın malı sayıp din adamlarına bırak",
             advisorType: "din",
-            dinChange: 15,
+            dinChange: 9,
             ekonomiChange: 5,
             halkChange: 8,
           ),
@@ -398,14 +386,13 @@ class GameData {
             ekonomiChange: 8,
             halkChange: 5,
           ),
-        ],
-      ),
+        ],      ),
 
       // === KRALLIK SEVİYESİ OLAYLARI ===
       EventCard(
         title: "Kraliyet Evliliği Teklifi",
         description: "Güçlü komşu krallığın kralı kızını seninle evlendirmek istiyor.",
-        imagePath: "card/royal_marriage.jpg",
+        imagePath: "city/olaylar/kraliyet_evlilik.jpeg",
         governmentLevels: ["krallık"],
         choices: [
           Choice(
@@ -441,7 +428,6 @@ class GameData {
       EventCard(
         title: "Antik İmparatorluk Kalıntıları",
         description: "Arkeologlar antik imparatorluğun kalıntılarını keşfetti.",
-        imagePath: "card/ancient_ruins.jpg",
         governmentLevels: ["imparatorluk"],
         choices: [
           Choice(
@@ -478,7 +464,6 @@ class GameData {
       EventCard(
         title: "Ticaret Krizi",
         description: "Ana ticaret yolları kesildi ve ekonomi sarsıldı.",
-        imagePath: "events/trade.jpg",
         governmentLevels: ["köy", "derebeylik"],
         choices: [
           Choice(
@@ -513,7 +498,6 @@ class GameData {
       EventCard(
         title: "Gizemli Hastalık",
         description: "Şehirde gizemli bir hastalık yayılmaya başladı.",
-        imagePath: "card/plague.jpg",
         governmentLevels: ["köy", "derebeylik"],
         choices: [
           Choice(
@@ -546,7 +530,6 @@ class GameData {
       EventCard(
         title: "Ejder Efsanesi",
         description: "Dağlarda büyük bir ejderin uyandığı söyleniyor.",
-        imagePath: "card/dragon.jpg",
         governmentLevels: ["derebeylik"],
         choices: [
           Choice(
@@ -579,7 +562,6 @@ class GameData {
       EventCard(
         title: "Gizli Hazine",
         description: "Eski çiftçi gizli hazine haritası getirdi.",
-        imagePath: "card/treasure.jpg",
         governmentLevels: ["köy"],
         choices: [
           Choice(
@@ -850,7 +832,6 @@ class GameData {
     return EventCard(
       title: "Hastalığın Yayılması",
       description: "Hastalık yayılmaya devam ediyor ve durum kontrolden çıkıyor.",
-      imagePath: "card/plague.jpg",
       governmentLevels: [
         "köy",
         "derebeylik",
@@ -888,7 +869,6 @@ class GameData {
     return EventCard(
       title: "Hekimin Keşfi",
       description: "Hekim hastalığın su kaynaklarından bulaştığını keşfetti.",
-      imagePath: "card/plague.jpg",
       governmentLevels: [
         "köy",
         "derebeylik",
@@ -926,7 +906,6 @@ class GameData {
     return EventCard(
       title: "Karantina Sonuçları",
       description: "Karantina hastalığı durdurdu ama ekonomiyi çok etkiledi.",
-      imagePath: "card/plague.jpg",
       governmentLevels: [
         "köy",
         "derebeylik",
@@ -964,7 +943,6 @@ class GameData {
     return EventCard(
       title: "Ejder Avcısının Dönüşü",
       description: "Şövalye ejderi buldu ama yaşlı ve hasta olduğunu keşfetti.",
-      imagePath: "card/dragon.jpg",
       governmentLevels: [
         "köy",
         "derebeylik",
@@ -1003,7 +981,6 @@ class GameData {
     return EventCard(
       title: "Ejderin Gazabı",
       description: "Ejder haraçlardan memnun olmadı ve köyleri yakmaya başladı.",
-      imagePath: "card/dragon.jpg",
       governmentLevels: [
         "köy",
         "derebeylik",
@@ -1041,7 +1018,6 @@ class GameData {
     return EventCard(
       title: "Hazine Araştırması",
       description: "Hazinede altın, mücevher ve gizemli büyülü eşyalar bulundu.",
-      imagePath: "card/treasure.jpg",
       governmentLevels: ["köy", "derebeylik"],
       choices: [
         Choice(
@@ -1076,7 +1052,6 @@ class GameData {
     return EventCard(
       title: "Halkın Minneti",
       description: "Hazineyi halka dağıttın ve büyük sevgi kazandın.",
-      imagePath: "card/treasure.jpg",
       governmentLevels: ["köy", "derebeylik"],
       choices: [
         Choice(
@@ -1115,7 +1090,6 @@ class GameData {
       EventCard(
         title: "Gizemli Hastalık",
         description: "Şehirde gizemli ve bilinmeyen bir hastalık yayılmaya başladı.",
-        imagePath: "card/plague.jpg",
         governmentLevels: ["köy", "derebeylik"],
         choices: [
           Choice(
@@ -1148,7 +1122,6 @@ class GameData {
       EventCard(
         title: "Ejder Efsanesi",
         description: "Dağlarda büyük bir ejderin uyandığı söyleniyor.",
-        imagePath: "card/dragon.jpg",
         governmentLevels: ["derebeylik"],
         choices: [
           Choice(
@@ -1181,7 +1154,6 @@ class GameData {
       EventCard(
         title: "Gizli Hazine",
         description: "Eski çiftçi gizli hazine haritası getirdi.",
-        imagePath: "card/treasure.jpg",
         governmentLevels: ["köy"],
         choices: [
           Choice(
