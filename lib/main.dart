@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
-import 'package:audioplayers/audioplayers.dart';
 import 'game_data.dart';
-
-// Global ayar değişkenleri
-bool globalMusicEnabled = true;
-bool globalSoundEnabled = true;
 
 void main() {
   runApp(const MyApp());
@@ -481,19 +476,10 @@ class StartScreen extends StatefulWidget {
 }
 
 class _StartScreenState extends State<StartScreen> {
-  bool _isMusicEnabled = true;
-  bool _isSoundEnabled = true;
   @override
   void initState() {
     super.initState();
-    // Global değişkenleri local değişkenlerle senkronize et
-    _isMusicEnabled = globalMusicEnabled;
-    _isSoundEnabled = globalSoundEnabled;
-    
-    print('Uygulama başlatılıyor');
-    Future.delayed(const Duration(milliseconds: 500), () {
-      print('🔥 APLİKASYON BAŞLATILDI');
-    });
+    // Uygulama başlatılıyor
   }
 
   @override
@@ -517,56 +503,99 @@ class _StartScreenState extends State<StartScreen> {
               Color(0xFF616161),
             ],
           ),
-        ),        child: Stack(
-          children: [
-            // Ana play butonu - merkez
+        ),
+        child: Stack(          children: [            // Ana içerik - logo ve başlat butonu
             Center(
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (context) => const GameScreen(),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min, 
+                children: [
+                  // Gri tonlamalı oyun ikonu - ekran genişliğini dolduracak şekilde
+                  ColorFiltered(
+                    colorFilter: const ColorFilter.matrix([
+                      0.33, 0.33, 0.33, 0, 20, // Daha açık gri tonlar için değerler ayarlandı
+                      0.33, 0.33, 0.33, 0, 20, // Son sayılar parlaklık değeri (brightness)
+                      0.33, 0.33, 0.33, 0, 20,
+                      0, 0, 0, 1, 0,
+                    ]),
+                    child: LayoutBuilder(
+                      builder: (BuildContext context, BoxConstraints constraints) {
+                        double screenWidth = MediaQuery.of(context).size.width;
+                        double iconWidth = screenWidth * 0.95; // Ekranın %95'ini kaplasın
+                        double iconHeight = iconWidth * 0.8; // Yükseklik genişliğin %80'i olsun
+                        
+                        return Container(
+                          width: iconWidth,
+                          height: iconHeight,
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          decoration: BoxDecoration(
+                            // Yumuşak gölge ekleyerek arkaplan ile karışmasını sağla
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.shade800.withValues(alpha: 0.2),
+                                blurRadius: 20,
+                                spreadRadius: 5,
+                              )
+                            ],
+                          ),
+                          child: Image.asset(
+                            'icon/file_0000000082b86243a1042895da19c517.png',
+                            fit: BoxFit.contain, // İçeriği koruyarak sığdır
+                          ),
+                        );
+                      },
                     ),
-                  );
-                },
-                child: Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Color(0xFF1C1C1C),
-                        Color(0xFF000000),
-                      ],
-                    ),
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.2),
-                      width: 2,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.5),
-                        blurRadius: 25,
-                        spreadRadius: 5,
-                        offset: const Offset(0, 8),
-                      ),
-                      BoxShadow(
-                        color: Colors.white.withOpacity(0.1),
-                        blurRadius: 10,
-                        spreadRadius: -5,
-                        offset: const Offset(0, -5),
-                      ),
-                    ],
                   ),
-                  child: const Icon(
-                    Icons.play_arrow_rounded,
-                    size: 50,
-                    color: Colors.white,
+                  const SizedBox(height: 50), // Boşluğu da arttırdık
+                  // Başlat butonu
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (context) => const GameScreen(),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Color(0xFF1C1C1C),
+                            Color(0xFF000000),
+                          ],
+                        ),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          width: 2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.2),
+                            blurRadius: 25,
+                            spreadRadius: 5,
+                            offset: const Offset(0, 8),
+                          ),
+                          BoxShadow(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            blurRadius: 10,
+                            spreadRadius: -5,
+                            offset: const Offset(0, -5),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.play_arrow_rounded,
+                        size: 50,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
             
@@ -591,12 +620,12 @@ class _StartScreenState extends State<StartScreen> {
                     ),
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: Colors.white.withOpacity(0.1),
+                      color: Colors.white.withValues(alpha: 0.2),
                       width: 1,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
+                        color: Colors.black.withValues(alpha: 0.2),
                         blurRadius: 15,
                         spreadRadius: 2,
                         offset: const Offset(0, 4),
@@ -615,10 +644,6 @@ class _StartScreenState extends State<StartScreen> {
       ),
     );
   }  void _showSettingsDialog(BuildContext context) {
-    // Dialog açılmadan önce değerleri global değişkenlerle senkronize et
-    _isMusicEnabled = globalMusicEnabled;
-    _isSoundEnabled = globalSoundEnabled;
-    
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -640,12 +665,12 @@ class _StartScreenState extends State<StartScreen> {
               ),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 width: 1,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.5),
+                  color: Colors.black.withValues(alpha: 0.2),
                   blurRadius: 20,
                   spreadRadius: 5,
                 ),
@@ -671,45 +696,29 @@ class _StartScreenState extends State<StartScreen> {
                   subtitle: 'Türkçe',
                   onTap: () {
                     // Dil seçimi dialog'u açılacak
-                    _showLanguageDialog(context);
-                  },
+                    _showLanguageDialog(context);                  },
                 ),
-
-                const SizedBox(height: 20),                // Müzik Toggle
-                _buildSettingItem(
-                  icon: Icons.music_note,
-                  title: 'Müzik',
-                  isToggle: true,
-                  value: _isMusicEnabled,                  onChanged: (value) {
-                    setState(() {
-                      _isMusicEnabled = value;
-                      globalMusicEnabled = value;
-                    });
-                    setDialogState(() {
-                      _isMusicEnabled = value;
-                    });
-                    // Müzik durumunu hemen kontrol et
-                    _handleMusicToggle(value);
-                  },
+                
+                const SizedBox(height: 15),
+                
+                // Ses ve müzik özellikleri kaldırıldı
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Text(
+                    'Ses ve müzik özellikleri devre dışı bırakılmıştır.',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
-
-                const SizedBox(height: 20),
-
-                // Ses Efektleri Toggle
-                _buildSettingItem(
-                  icon: Icons.volume_up,
-                  title: 'Ses Efektleri',
-                  isToggle: true,
-                  value: _isSoundEnabled,                  onChanged: (value) {
-                    setState(() {
-                      _isSoundEnabled = value;
-                      globalSoundEnabled = value;
-                    });
-                    setDialogState(() {
-                      _isSoundEnabled = value;
-                    });
-                  },
-                ),const SizedBox(height: 30),
+                
+                const SizedBox(height: 30),
                 
                 // Kapat Butonu
                 ElevatedButton(
@@ -717,7 +726,7 @@ class _StartScreenState extends State<StartScreen> {
                     Navigator.of(context).pop();
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white.withOpacity(0.1),
+                    backgroundColor: Colors.white.withValues(alpha: 0.2),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(
                       horizontal: 40,
@@ -726,7 +735,7 @@ class _StartScreenState extends State<StartScreen> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
                       side: BorderSide(
-                        color: Colors.white.withOpacity(0.3),
+                        color: Colors.white.withValues(alpha: 0.2),
                         width: 1,
                       ),
                     ),
@@ -760,10 +769,10 @@ class _StartScreenState extends State<StartScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Colors.white.withOpacity(0.1),
+          color: Colors.white.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -791,27 +800,28 @@ class _StartScreenState extends State<StartScreen> {
                   Text(
                     subtitle,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.6),
+                      color: Colors.white.withValues(alpha: 0.2),
                       fontSize: 14,
                     ),
                   ),
               ],
             ),
-          ),          if (isToggle)
+          ),
+          if (isToggle)
             Switch(
               value: value,
               onChanged: onChanged,
               activeColor: Colors.white,
-              activeTrackColor: Colors.green.withOpacity(0.6),
-              inactiveThumbColor: Colors.grey.shade400,
-              inactiveTrackColor: Colors.grey.withOpacity(0.3),
+              activeTrackColor: Colors.white.withValues(alpha: 0.2),
+              inactiveThumbColor: Colors.white.withValues(alpha: 0.2),
+              inactiveTrackColor: Colors.white.withValues(alpha: 0.2),
             )
           else if (onTap != null)
             GestureDetector(
               onTap: onTap,
               child: Icon(
                 Icons.arrow_forward_ios,
-                color: Colors.white.withOpacity(0.6),
+                color: Colors.white.withValues(alpha: 0.2),
                 size: 16,
               ),
             ),
@@ -840,7 +850,7 @@ class _StartScreenState extends State<StartScreen> {
               ),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: Colors.white.withOpacity(0.2),
+                color: Colors.white.withValues(alpha: 0.2),
                 width: 1,
               ),
             ),
@@ -870,7 +880,7 @@ class _StartScreenState extends State<StartScreen> {
                     Navigator.of(context).pop();
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white.withOpacity(0.1),
+                    backgroundColor: Colors.white.withValues(alpha: 0.2),
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
@@ -891,13 +901,13 @@ class _StartScreenState extends State<StartScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: isSelected 
-            ? Colors.white.withOpacity(0.1) 
+            ? Colors.white.withValues(alpha: 0.2) 
             : Colors.transparent,
         borderRadius: BorderRadius.circular(10),
         border: Border.all(
           color: isSelected 
-              ? Colors.white.withOpacity(0.3) 
-              : Colors.white.withOpacity(0.1),
+              ? Colors.white.withValues(alpha: 0.2) 
+              : Colors.white.withValues(alpha: 0.2),
           width: 1,
         ),
       ),
@@ -922,22 +932,10 @@ class _StartScreenState extends State<StartScreen> {
               Icons.check,
               color: Colors.white,
               size: 20,
-            ),        ],
+            ),
+        ],
       ),
     );
-  }
-  // Müzik toggle değiştiğinde çağrılır
-  void _handleMusicToggle(bool enabled) {
-    print('🎵 Müzik toggle değişti: $enabled');
-    print('🎵 Global müzik durumu: $globalMusicEnabled');
-    
-    if (enabled) {
-      print('🎵 Müzik açıldı - Oyun müziği başlatılıyor');
-      // TODO: GameScreen'deki müziği başlat (şimdilik sadece log)
-    } else {
-      print('🎵 Müzik kapatıldı - Oyun müziği durduruluyor');
-      // TODO: GameScreen'deki müziği durdur (şimdilik sadece log)
-    }
   }
 }
 
@@ -949,16 +947,12 @@ class GameScreen extends StatefulWidget {
 }
 
 class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
-  late GameState gameState;
-  late List<EventCard> events;
+  late GameState gameState;  late List<EventCard> events;
   late EventCard currentEvent;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late AnimationController _cardFlipController;
-  late Animation<double> _cardFlipAnimation;  // Sınıf seviyesinde AudioPlayer tanımlandı
-  final AudioPlayer _backgroundMusicPlayer = AudioPlayer();
-
-  @override
+  late Animation<double> _cardFlipAnimation;  @override
   void initState() {
     super.initState();
     gameState = GameState();
@@ -980,21 +974,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       vsync: this,
     );    _cardFlipAnimation = Tween<double>(
       begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
+      end: 1.0,    ).animate(CurvedAnimation(
       parent: _cardFlipController,
       curve: Curves.easeInOut,    ));
-    
-    // Arkaplan müziğini hemen başlat
-    _startBackgroundMusic();
-    
-    // Ayrıca biraz gecikmeli backup başlatma
-    Future.delayed(const Duration(milliseconds: 2000), () {
-      if (globalMusicEnabled && _backgroundMusicPlayer.state != PlayerState.playing) {
-        print('🔄 Backup müzik başlatma...');
-        _startBackgroundMusic();
-      }
-    });
   }
   void _initializeEvents() {
     events = GameData.getEvents();
@@ -1175,9 +1157,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       _selectRandomEvent();
       _animationController.forward();
     }
-  }
-  void _showGameOverDialog() {
- 
+  }  void _showGameOverDialog() {
+    // Arkaplan müziği oyun sırasında durmayacak
     
     showDialog(
       context: context,
@@ -1186,36 +1167,30 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         return AlertDialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
-          ),          title: Container(
+          ),
+          backgroundColor: const Color(0xFF222222), // Siyaha yakın koyu gri arkaplan
+          title: Container(
             alignment: Alignment.center,
             child: Column(
               children: [
                 // Yenilgi resmi ekleme - büyütülmüş
                 Container(
-                  width: 250,
-                  height: 200,
+                  width: 300,
+                  height: 240,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.grey.shade800, width: 4),
                     image: const DecorationImage(
-                      image: AssetImage("city/yenilgi.jpg"),
+                      image: AssetImage("city/basarisizlik.jpg"),
                       fit: BoxFit.cover,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
-                        blurRadius: 12,
-                        offset: const Offset(0, 6),
+                        color: Colors.black.withValues(alpha: 0.2),
+                        blurRadius: 15,
+                        offset: const Offset(0, 8),
                       ),
                     ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'Oyun Bitti!',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.red,
                   ),
                 ),
               ],
@@ -1227,52 +1202,79 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
+                  color: const Color(0xFF333333), // Koyu gri arkaplan
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade300),
+                  border: Border.all(color: Colors.grey.shade600),
                 ),
                 child: Column(
                   children: [
-                    Text(
-                      _getGameOverReason(),
-                      style: const TextStyle(
-                        fontSize: 16,
-                        color: Colors.black87,
+                    // Daha belirgin oyun sonu mesajı
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF444444), // Biraz daha açık gri
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: Colors.amber.shade900, width: 2),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.2),
+                            blurRadius: 5,
+                            spreadRadius: 1,
+                          ),
+                        ],
                       ),
-                      textAlign: TextAlign.center,
-                    ),                    const SizedBox(height: 16),                    Container(
+                      child: Text(
+                        _getGameOverReason(),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.amber.shade300, // Koyu tema üzerinde altın sarısı metin
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    
+                    const SizedBox(height: 16),
+                    
+                    Container(
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(
                         vertical: 12,
                         horizontal: 16,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.blue.shade50,
+                        color: const Color(0xFF3A3A3A), // Biraz daha açık gri
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.blue.shade300),
+                        border: Border.all(color: Colors.grey.shade700),
                       ),
                       child: Column(
                         children: [
                           Icon(
                             Icons.calendar_month,
-                            color: Colors.blue.shade700,
+                            color: Colors.amber.shade400, // Koyu tema üzerinde altın sarısı ikon
                             size: 24,
-                          ),                          const SizedBox(height: 8),
+                          ),
+                          
+                          const SizedBox(height: 8),
+                          
                           Text(
                             "Yönetilen Süre:",
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
-                              color: Colors.blue.shade600,
+                              color: Colors.grey.shade300, // Açık gri metin
                             ),
                             textAlign: TextAlign.center,
-                          ),                          const SizedBox(height: 4),
+                          ),
+                          
+                          const SizedBox(height: 4),
+                          
                           Text(
                             _formatTimePassed(),
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: Colors.blue.shade700,
+                              color: Colors.amber.shade300, // Koyu tema üzerinde altın sarısı metin
                             ),
                             textAlign: TextAlign.center,
                           ),
@@ -1283,67 +1285,62 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                 ),
               ),
             ],
-          ),          actions: [
-            // Yeniden Başla Butonu
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  setState(() {
-                    gameState = GameState();
-                    _selectRandomEvent();
-                  });
-      
-                },
-                icon: const Icon(Icons.refresh, color: Colors.white),
-                label: const Text(
-                  'Yeniden Başla',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green.shade600,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            // Ana Sayfaya Dön Butonu
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (context) => const StartScreen(),
+          ),
+          actionsAlignment: MainAxisAlignment.center,
+          actions: [
+            // Butonları yatay olarak yan yana gösterilen ikonlu kare butonlar
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Yeniden Başla Butonu (sadece ikon)
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 10),
+                  width: 60,
+                  height: 60,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      setState(() {
+                        gameState = GameState();
+                        _selectRandomEvent();
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green.shade700, // Koyu tema için daha koyu yeşil
+                      padding: EdgeInsets.zero,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
-                  );
-                },
-                icon: const Icon(Icons.home, color: Colors.white),
-                label: const Text(
-                  'Ana Sayfaya Dön',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    child: const Icon(Icons.refresh, color: Colors.white, size: 30),
                   ),
                 ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue.shade600,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                
+                // Ana Sayfaya Dön Butonu (sadece ikon)
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 10),
+                  width: 60,
+                  height: 60,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (context) => const StartScreen(),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue.shade700, // Koyu tema için daha koyu mavi
+                      padding: EdgeInsets.zero,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: const Icon(Icons.home, color: Colors.white, size: 30),
                   ),
                 ),
-              ),
+              ],
             ),
           ],
         );
@@ -1363,8 +1360,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
       default:
         return "city/derebeyi.jpeg"; // Varsayılan görsel
     }
-  }
-  void _showLevelUpDialog(GovernmentLevel oldLevel, GovernmentLevel newLevel) {
+  }  void _showLevelUpDialog(GovernmentLevel oldLevel, GovernmentLevel newLevel) {
     String message = "";
 
     switch (newLevel) {
@@ -1416,7 +1412,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                     border: Border.all(color: Colors.amber.shade300, width: 4),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
+                        color: Colors.black.withValues(alpha: 0.2),
                         blurRadius: 12,
                         offset: const Offset(0, 6),
                       ),
@@ -1427,11 +1423,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                     child: Image.asset(
                       _getLevelUpImagePath(newLevel),
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        print(
-                          'Görsel yüklenemedi: ${_getLevelUpImagePath(newLevel)}',
-                        );
-                        print('Hata: $error');
+                      errorBuilder: (context, error, stackTrace) {                        // Görsel yüklenemedi hatası
                         return Container(
                           color: Colors.amber.shade100,
                           child: Column(
@@ -1540,7 +1532,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
+                        color: Colors.black.withValues(alpha: 0.2),
                         blurRadius: 12,
                         offset: const Offset(0, 6),
                       ),
@@ -1629,7 +1621,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: personalityAnalysis['color'].withValues(alpha: 0.1),
+                    color: personalityAnalysis['color'].withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: personalityAnalysis['color']),
                   ),
@@ -1668,9 +1660,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                           horizontal: 16,
                         ),
                         decoration: BoxDecoration(
-                          color: personalityAnalysis['color'].withValues(
-                            alpha: 0.2,
-                          ),
+                          color: personalityAnalysis['color'].withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(8),
                           border: Border.all(
                             color: personalityAnalysis['color'],
@@ -1923,14 +1913,12 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           if (gameState.halk <= 10) missing.add("Halk > 10");
           if (gameState.ekonomi <= 25) missing.add("Ekonomi > 25");
           if (gameState.daysAtCurrentLevel < 1095) missing.add("3 yıl tamamla");
-          requirementMessage = "Gereken: ${missing.join(', ')}";
+          requirementMessage = missing.join(', ');
         }
         break;
-      case GovernmentLevel.derebeylik:        meetsRequirements =
-            gameState.halk > 30 &&
+      case GovernmentLevel.derebeylik:        meetsRequirements =            gameState.halk > 30 &&
             gameState.ekonomi > 30 &&
-            gameState.din > 40 &&
-            gameState.asker >= 40 &&
+            gameState.din > 40 &&            gameState.asker >= 40 &&
             gameState.daysAtCurrentLevel >= 1095;
         if (!meetsRequirements) {
           List<String> missing = [];
@@ -1938,10 +1926,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           if (gameState.ekonomi <= 30) missing.add("Ekonomi > 30");
           if (gameState.din <= 40) missing.add("Din > 40");
           if (gameState.asker < 40) missing.add("Asker ≥ 40");          if (gameState.daysAtCurrentLevel < 1095) missing.add("3 yıl tamamla");
-          requirementMessage = "Gereken: ${missing.join(', ')}";
+          requirementMessage = missing.join(', ');
         }
-        break;
-      case GovernmentLevel.prenslik:        meetsRequirements =
+        break;      case GovernmentLevel.prenslik:        meetsRequirements =
             gameState.ekonomi >= 60 &&
             gameState.asker >= 30 &&
             gameState.daysAtCurrentLevel >= 1095;
@@ -1949,10 +1936,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           List<String> missing = [];
           if (gameState.ekonomi < 60) missing.add("Ekonomi ≥ 60");
           if (gameState.asker < 30) missing.add("Asker ≥ 30");          if (gameState.daysAtCurrentLevel < 1095) missing.add("3 yıl tamamla");
-          requirementMessage = "Gereken: ${missing.join(', ')}";
+          requirementMessage = missing.join(', ');
         }
-        break;
-      case GovernmentLevel.krallik:        meetsRequirements =
+        break;      case GovernmentLevel.krallik:        meetsRequirements =
             gameState.halk >= 60 &&
             gameState.asker >= 50 &&
             gameState.daysAtCurrentLevel >= 1095;
@@ -1961,7 +1947,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           if (gameState.halk < 60) missing.add("Halk ≥ 60");
           if (gameState.asker < 50) missing.add("Asker ≥ 50");
           if (gameState.daysAtCurrentLevel < 1095) missing.add("3 yıl tamamla");
-          requirementMessage = "Gereken: ${missing.join(', ')}";
+          requirementMessage = missing.join(', ');
         }
         break;
       default:
@@ -2052,7 +2038,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                         children: [                          // Arka plan resmi (eğer varsa)
                           if (currentEvent.imagePath.isNotEmpty) ...[
                             Builder(builder: (context) {
-                              print('🖼️ Resim yolu: ${currentEvent.imagePath}');
+                              // Resim yolu mevcut
                               return const SizedBox.shrink();
                             }),
                             Positioned.fill(
@@ -2061,9 +2047,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                 child: Image.asset(
                                   currentEvent.imagePath,
                                   fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    print('❌ Resim yüklenemiyor: ${currentEvent.imagePath}');
-                                    print('❌ Hata: $error');
+                                  errorBuilder: (context, error, stackTrace) {                                    // Resim yüklenemiyor
                                     return Container(
                                       color: Colors.grey.shade800,
                                       child: Column(
@@ -2110,7 +2094,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                       Shadow(
                                         offset: Offset(1, 1),
                                         blurRadius: 3,
-                                        color: Colors.black.withOpacity(0.8),
+                                        color: Colors.black.withValues(alpha: 0.2),
                                       ),
                                     ],
                                   ),
@@ -2128,7 +2112,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                                           Shadow(
                                             offset: Offset(1, 1),
                                             blurRadius: 2,
-                                            color: Colors.black.withOpacity(0.8),
+                                            color: Colors.black.withValues(alpha: 0.2),
                                           ),
                                         ],
                                       ),
@@ -2165,53 +2149,53 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     // Seviye bazlı maksimum değerleri al
     int maxValue;
     switch (gameState.level) {
-      case GovernmentLevel.koyu:
-        if (label == "Halk") {
+      case GovernmentLevel.koyu:        if (label == "Halk") {
           maxValue = 60;
-        } else if (label == "Din")
+        } else if (label == "Din") {
           maxValue = 40;
-        else if (label == "Asker")
+        } else if (label == "Asker") {
           maxValue = 40;
-        else if (label == "Ekonomi")
+        } else if (label == "Ekonomi") {
           maxValue = 60;
-        else
+        } else {
           maxValue = 100;
+        }
         break;
-      case GovernmentLevel.derebeylik:
-        if (label == "Halk") {
+      case GovernmentLevel.derebeylik:        if (label == "Halk") {
           maxValue = 70;
-        } else if (label == "Din")
+        } else if (label == "Din") {
           maxValue = 50;
-        else if (label == "Asker")
+        } else if (label == "Asker") {
           maxValue = 55;
-        else if (label == "Ekonomi")
+        } else if (label == "Ekonomi") {
           maxValue = 70;
-        else
+        } else {
           maxValue = 100;
+        }
         break;
-      case GovernmentLevel.prenslik:
-        if (label == "Halk") {
+      case GovernmentLevel.prenslik:        if (label == "Halk") {
           maxValue = 75;
-        } else if (label == "Din")
+        } else if (label == "Din") {
           maxValue = 60;
-        else if (label == "Asker")
+        } else if (label == "Asker") {
           maxValue = 65;
-        else if (label == "Ekonomi")
+        } else if (label == "Ekonomi") {
           maxValue = 80;
-        else
+        } else {
           maxValue = 100;
+        }
         break;
       case GovernmentLevel.krallik:
         if (label == "Halk") {
-          maxValue = 85;
-        } else if (label == "Din")
+          maxValue = 85;        } else if (label == "Din") {
           maxValue = 80;
-        else if (label == "Asker")
+        } else if (label == "Asker") {
           maxValue = 85;
-        else if (label == "Ekonomi")
+        } else if (label == "Ekonomi") {
           maxValue = 90;
-        else
+        } else {
           maxValue = 100;
+        }
         break;
       case GovernmentLevel.imparatorluk:
         maxValue = 100;
@@ -2284,6 +2268,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
         double titleFontSize = screenWidth < 600 ? 16 : 20;
         double descriptionFontSize = screenWidth < 600 ? 14 : 17;
         double cardPadding = screenWidth < 600 ? 8.0 : 12.0; // Padding arttır
+
         double containerPadding = screenWidth < 600 ? 4 : 6;        return MouseRegion(
          
           child: AnimatedBuilder(
@@ -2293,11 +2278,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                 alignment: Alignment.center,
                 transform: Matrix4.identity()
                   ..setEntry(3, 2, 0.001)
-                  ..rotateY(0.1 * _cardFlipAnimation.value),
-                child: GestureDetector(                  onTap: () async {
-                    // Kart sesi çalma fonksiyonu
-                    _playCardSound();
-                
+                  ..rotateY(0.1 * _cardFlipAnimation.value),                child: GestureDetector(
+                  onTap: () async {
                     // Kart flip animasyonu çal
                     _cardFlipController.forward().then((_) {
                       _cardFlipController.reverse();
@@ -2307,8 +2289,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                     _executeChoice(choice);
                   },
             child: Card(
-            elevation: 8, // Daha belirgin shadow efekti
-            shadowColor: Colors.black.withOpacity(0.3),
+                       elevation: 8, // Daha belirgin shadow efekti
+            shadowColor: Colors.black.withValues(alpha: 0.2),
             color: const Color(0xFFF5F5F5), // Beyazımsı gri renk
             child: Padding(
               padding: EdgeInsets.all(cardPadding),
@@ -2512,7 +2494,6 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
     
     return cards;
   }
-
   Widget _buildLevelSection() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -2526,42 +2507,48 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
           padding: const EdgeInsets.all(12.0),
           child: Row(
             children: [
-              // Mevcut seviye bilgisi
+              // Mevcut seviye bilgisi - tıklanabilir
               Expanded(
                 flex: 3,
-                child: Row(
-                  children: [
-                    Icon(
-                      gameState.level.icon,
-                      color: Colors.amber.shade700,
-                      size: 24,
-                    ),
-                    const SizedBox(width: 8),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          "Mevcut Seviye",
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: Colors.grey.shade600,
-                            fontWeight: FontWeight.w500,
+                child: InkWell(
+                  onTap: () => _showLevelInfoPopup(context),
+                  borderRadius: BorderRadius.circular(8),
+                  child: Row(
+                    children: [
+                      Icon(
+                        gameState.level.icon,
+                        color: Colors.amber.shade700,
+                        size: 24,
+                      ),
+                      const SizedBox(width: 8),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            "Mevcut Seviye",
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: Colors.grey.shade600,
+                              fontWeight: FontWeight.w500,
+                            ),
                           ),
-                        ),
-                        Text(
-                          gameState.level.name,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.amber.shade800,
+                          Text(
+                            gameState.level.name,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.amber.shade800,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),              // Yönetilen gün sayacı
+              ),
+              
+              // Yönetilen gün sayacı
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
                 child: Column(
@@ -2677,146 +2664,688 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin {
                         ),
                       ),
               ),
-            ],
-          ),
+            ],          ),
         ),
-      ),
-    );
-  }  // Kart sesi çalma fonksiyonu
-  void _playCardSound() async {
-    if (!globalSoundEnabled) return;
-    
-    try {
-      print('🔊 Kart sesi çalmaya başlıyor...');
-      print('🔊 Arkaplan müziği durumu ÖNCE: ${_backgroundMusicPlayer.state}');
-      
-      // Kart sesi için tamamen yeni ve izole AudioPlayer
-      final cardSoundPlayer = AudioPlayer();
-      
-      // Arkaplan müziğini etkilememesi için özel ayarlar
-      await cardSoundPlayer.setAudioContext(AudioContext(
-        android: AudioContextAndroid(
-          isSpeakerphoneOn: false,
-          stayAwake: false,
-          contentType: AndroidContentType.sonification,
-          usageType: AndroidUsageType.notification,
-          audioFocus: AndroidAudioFocus.none, // ÖNEMLI: Audio focus almayacak
-        ),
-        iOS: AudioContextIOS(
-          category: AVAudioSessionCategory.ambient,
-          options: {
-            AVAudioSessionOptions.mixWithOthers, // Diğer seslerle karışabilir
-          },
-        ),
-      ));
-      
-      await cardSoundPlayer.setVolume(0.7);
-      await cardSoundPlayer.play(AssetSource('music/kart_sesi.mp3'));
-      
-      print('🔊 Kart sesi başlatıldı');
-      print('🔊 Arkaplan müziği durumu SONRA: ${_backgroundMusicPlayer.state}');
-        // Ses bittikten sonra temizlik ve müzik kontrol
-      cardSoundPlayer.onPlayerComplete.listen((_) {
-        print('🔊 Kart sesi tamamlandı, player temizleniyor');
-        cardSoundPlayer.dispose();
-        
-        // Arkaplan müziğinin hala çalıp çalmadığını kontrol et
-        Future.delayed(const Duration(milliseconds: 100), () {
-          if (_backgroundMusicPlayer.state != PlayerState.playing && globalMusicEnabled) {
-            print('🎵 Arkaplan müziği kesilmiş, yeniden başlatılıyor...');
-            _backgroundMusicPlayer.resume();
-          }
-        });
-      });
-      
-      // 3 saniye sonra zorla temizlik (güvenlik için)
-      Future.delayed(const Duration(seconds: 3), () {
-        if (cardSoundPlayer.state != PlayerState.disposed) {
-          cardSoundPlayer.dispose();
-        }
-      });
-      
-    } catch (e) {
-      print('❌ Kart sesi hatası: $e');
-    }
-  }  // Arkaplan müziği başlatma fonksiyonu
-  void _startBackgroundMusic() async {
-    if (!globalMusicEnabled) {
-      print('🎵 Müzik kapalı, başlatılmadı');
-      return;
-    }
-    
-    try {
-      print('🎵 Arkaplan müziği başlatılıyor...');
-      print('🎵 GlobalMusicEnabled: $globalMusicEnabled');
-      print('🎵 Asset yolu: music/arkaplan_ses.mp3');
-      
-      // Arkaplan müziği için güçlü audio context
-      await _backgroundMusicPlayer.setAudioContext(AudioContext(
-        android: AudioContextAndroid(
-          isSpeakerphoneOn: false,
-          stayAwake: true,
-          contentType: AndroidContentType.music,
-          usageType: AndroidUsageType.media,
-          audioFocus: AndroidAudioFocus.gain, // Dominant audio focus
-        ),
-        iOS: AudioContextIOS(
-          category: AVAudioSessionCategory.playback,
-          options: {
-            AVAudioSessionOptions.mixWithOthers, // Diğer seslerle karışabilir
-          },
-        ),
-      ));
-      
-      await _backgroundMusicPlayer.setReleaseMode(ReleaseMode.loop);
-      await _backgroundMusicPlayer.setVolume(0.4);
-      await _backgroundMusicPlayer.play(AssetSource('music/arkaplan_ses.mp3'));
-      
-      print('✅ Arkaplan müziği başlatma komutu gönderildi');
-      
-      // 1 saniye sonra durumu kontrol et
-      Future.delayed(const Duration(seconds: 1), () async {
-        try {
-          PlayerState state = _backgroundMusicPlayer.state;
-          print('🎵 Müzik durumu: $state');
-          
-          if (state != PlayerState.playing) {
-            print('⚠️ Müzik çalmıyor, tekrar deneniyor...');
-            await _backgroundMusicPlayer.resume();
-          }
-        } catch (e) {
-          print('❌ Durum kontrol hatası: $e');
-        }
-      });
-      
-    } catch (e) {
-      print('❌ Arkaplan müziği hatası: $e');
-      print('❌ Hata detayı: ${e.toString()}');
-      
-      // 3 saniye sonra tekrar dene
-      Future.delayed(const Duration(seconds: 3), () {
-        print('🔄 Arkaplan müziği tekrar deneniyor...');
-        _retryBackgroundMusic();
-      });
-    }
+      ),    );
   }
-
-  // Arkaplan müziği yeniden deneme fonksiyonu
-  void _retryBackgroundMusic() async {
-    if (!globalMusicEnabled) return;
-    
-    try {
-      await _backgroundMusicPlayer.play(AssetSource('music/arkaplan_ses.mp3'));
-      print('✅ Arkaplan müziği yeniden deneme başarılı');
-    } catch (e) {
-      print('❌ Arkaplan müziği yeniden deneme hatası: $e');    }
-  }
-  @override
+      @override
   void dispose() {
-    _backgroundMusicPlayer.dispose();
     _animationController.dispose();
     _cardFlipController.dispose();
   
     super.dispose();
+  }
+  // Seviye bilgisi popup'ı
+  void _showLevelInfoPopup(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Stack(
+            children: [
+              // Geri butonu (sol üst köşede)
+              Positioned(
+                left: 0,
+                top: 0,
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  iconSize: 20,
+                ),
+              ),
+              // Başlık metni (ortalanmış)
+              Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: Center(
+                  child: Text(
+                    "İlerleme",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.amber.shade800,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),          content: SizedBox(
+            width: double.maxFinite,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text("Seviye: ${gameState.level.name}", style: TextStyle(fontWeight: FontWeight.bold)),
+                SizedBox(height: 12),
+                Text("Toplam yönetilen gün: ${gameState.totalDays}"),
+                SizedBox(height: 12),
+                  // İlerleme bilgisi - oyunu tamamlama yüzdesi
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("Oyun İlerlemesi:"),
+                    Text(_getLevelProgressText(), style: TextStyle(fontWeight: FontWeight.bold)),
+                  ],
+                ),
+                
+                // İlerleme çubuğu - seviye bazlı ilerlemeyi gösterir
+                SizedBox(height: 8),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: LinearProgressIndicator(
+                    value: _getLevelProgressValue(),
+                    minHeight: 15,
+                    backgroundColor: Colors.grey.shade300,                    valueColor: AlwaysStoppedAnimation<Color>(
+                      gameState.canRetire ? Colors.green.shade700 : 
+                      gameState.level == GovernmentLevel.imparatorluk ? Colors.amber.shade800 : 
+                      Colors.amber.shade700,
+                    ),
+                  ),
+                ),
+                
+                // Kalan seviye bilgisi
+                SizedBox(height: 4),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [                    Text(
+                      gameState.canRetire ? 
+                      "Tebrikler! Emekli olabilirsiniz!" : 
+                      gameState.level == GovernmentLevel.imparatorluk ? 
+                      "İmparatorluk seviyesindesiniz! Emekli olmak için tüm değerleri 50'nin üzerine çıkarın." :
+                      gameState.canLevelUp ? 
+                      "Seviye atlamaya hazırsınız! Düğmeye tıklayarak ilerleyebilirsiniz." :
+                      _getLevelUpTooltip(),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: gameState.canRetire ? 
+                          Colors.green.shade700 : 
+                          gameState.level == GovernmentLevel.imparatorluk ? 
+                          Colors.amber.shade700 :
+                          gameState.canLevelUp ?
+                          Colors.green.shade600 :
+                          Colors.grey.shade700,
+                        fontWeight: gameState.canRetire || gameState.level == GovernmentLevel.imparatorluk || gameState.canLevelUp ? 
+                          FontWeight.bold : FontWeight.normal,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),          actions: [
+            // İki butonun yan yana gösterilmesi için Row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // İstatistik butonu (yalnızca ikon)
+                IconButton(
+                  icon: const Icon(Icons.insights),
+                  color: Colors.purple.shade700,
+                  iconSize: 24,
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Önce mevcut dialog'u kapat
+                    _showStatisticsDialog(context); // İstatistik dialog'unu göster
+                  },
+                ),
+                const SizedBox(width: 24), // Butonlar arası boşluk
+                // Ayarlar butonu (yalnızca ikon)
+                IconButton(
+                  icon: const Icon(Icons.settings),
+                  color: Colors.blue.shade700,
+                  iconSize: 24,
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Önce mevcut dialog'u kapat
+                    _showSettingsDialog(context); // Ayarlar dialog'unu göster
+                  },
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+    // Ayarlar dialog'u
+  void _showSettingsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
+              ),              title: Stack(
+                children: [                  // Geri butonu (sol üst köşede) - level info popup'a dön
+                  Positioned(
+                    left: 0,
+                    top: 0,
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: () {
+                        Navigator.of(context).pop(); // Önce ayarlar dialogunu kapat
+                        // Kısa bir gecikme ile level info popup'ı göster
+                        Future.delayed(const Duration(milliseconds: 100), () {
+                          _showLevelInfoPopup(context);
+                        });
+                      },
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      iconSize: 20,
+                    ),
+                  ),
+                  // Başlık (ortalanmış)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: Center(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.settings, color: Colors.amber.shade800),
+                          const SizedBox(width: 10),
+                          Text(
+                            "Ayarlar",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.amber.shade800,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Ses ve müzik devre dışı bırakıldı
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    child: const Text(
+                      'Ses ve müzik özellikleri devre dışı bırakılmıştır.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              actions: [],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  // Mevcut seviye indeksini döndür (0-4 arası)
+  int _getCurrentLevelIndex() {
+    switch (gameState.level) {
+      case GovernmentLevel.koyu:
+        return 0;
+      case GovernmentLevel.derebeylik:
+        return 1;
+      case GovernmentLevel.prenslik:
+        return 2;
+      case GovernmentLevel.krallik:
+        return 3;
+      case GovernmentLevel.imparatorluk:
+        return 4;
+    }
+  }
+  // İlerleme değerini hesapla (0.0 - 1.0 arası)
+  double _getLevelProgressValue() {
+    // Emekli olabilir durumdaysa %100 göster
+    if (gameState.canRetire) {
+      return 1.0;
+    }
+    
+    // İmparatorluk seviyesinde ama emekli olamıyorsa %90'da tut
+    if (gameState.level == GovernmentLevel.imparatorluk) {
+      return 0.9;
+    }
+    
+    // Diğer seviyelerde orantılı olarak ilerle (ilk 4 seviye için %0-%80 arası)
+    // İmparatorluk öncesindeki son seviye (Krallık) maksimum %80 göstersin
+    return _getCurrentLevelIndex() / 5.0; // 5.0 = tam ilerleme için bölüm faktörü
+  }
+    // İlerleme yüzdesini metin olarak döndür
+  String _getLevelProgressText() {
+    int yuzde = (_getLevelProgressValue() * 100).round();
+    
+    // İmparatorlukta ama emekli olamıyorsa eksik koşulları belirt
+    if (gameState.level == GovernmentLevel.imparatorluk && !gameState.canRetire) {
+      List<String> missing = [];
+      if (gameState.halk < 50) missing.add("Halk");
+      if (gameState.din < 50) missing.add("Din"); 
+      if (gameState.asker < 50) missing.add("Asker");
+      if (gameState.ekonomi < 50) missing.add("Ekonomi");
+      
+      String eksikler = missing.join(', ');
+      return "%$yuzde (Emeklilik için: $eksikler ≥ 50)";
+    }
+    
+    return "%$yuzde";
+  }
+  // İstatistik dialogu
+  void _showStatisticsDialog(BuildContext context) {
+    // Danışman kullanım sayılarını topla - hiç danışman kullanılmadıysa 0 olacaktır
+    final totalAdvisorUsage = gameState.advisorUsageCount.values.fold<int>(0, (sum, count) => sum + count);
+    
+    // Henüz hiç karar vermediyse farklı bir dialog göster
+    if (totalAdvisorUsage == 0) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            title: Stack(
+              children: [
+                // Geri butonu (sol üst köşede)
+                Positioned(
+                  left: 0,
+                  top: 0,
+                  child: IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    iconSize: 20,
+                  ),
+                ),
+                // Başlık metni (ortalanmış)
+                Padding(
+                  padding: const EdgeInsets.only(top: 10),
+                  child: Center(
+                    child: Text(
+                      "Yönetici Analizi",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.amber.shade800,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Bilgi ikonu
+                Icon(
+                  Icons.info_outline_rounded,
+                  color: Colors.blue.shade400,
+                  size: 64,
+                ),
+                const SizedBox(height: 16),
+                // Bilgi mesajı
+                Text(
+                  "Henüz yönetici analizi için yeterli veri yok!",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey.shade800,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  "Analiz için en az bir danışman kararı vermeniz gerekmektedir.",
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey.shade600,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 16),
+                // Oyuna devam etme tavsiyesi
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.amber.shade300),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.lightbulb, color: Colors.amber.shade700, size: 18),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          "Oyuna devam edin ve danışmanlarınızın tavsiyelerini dinleyin!",
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.amber.shade800,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            actions: [],
+          );
+        },
+      );
+      return;
+    }
+    
+    // En az bir karar verilmişse normal istatistik dialogunu göster
+    final personalityAnalysis = gameState.getPersonalityAnalysis();
+    
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Stack(
+            children: [
+              // Geri butonu (sol üst köşede)
+              Positioned(
+                left: 0,
+                top: 0,
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    // Kısa bir gecikme ile level info popup'ı göster
+                    Future.delayed(const Duration(milliseconds: 100), () {
+                      _showLevelInfoPopup(context);
+                    });
+                  },
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                  iconSize: 20,
+                ),
+              ),
+              // Başlık metni (ortalanmış)
+              Padding(
+                padding: const EdgeInsets.only(top: 10),
+                child: Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.insights, color: Colors.purple.shade700),
+                      const SizedBox(width: 10),
+                      Text(
+                        "Yönetici Analizi",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.purple.shade700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Yönetim süresi
+                Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.blue.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.blue.shade300),
+                  ),
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.calendar_month,
+                        color: Colors.blue.shade700,
+                        size: 24,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        "Yönetim Süresi:",
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.blue.shade600,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        _formatTimePassed(),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue.shade700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Kişilik Analizi
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: personalityAnalysis['color'].withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: personalityAnalysis['color']),
+                  ),
+                  child: Column(
+                    children: [
+                      // Kişilik başlığı
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            personalityAnalysis['icon'],
+                            color: personalityAnalysis['color'],
+                            size: 32,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              "Liderlik Kişiliğiniz",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: personalityAnalysis['color'],
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      // Kişilik tipi
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 8,
+                          horizontal: 16,
+                        ),
+                        decoration: BoxDecoration(
+                          color: personalityAnalysis['color'].withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: personalityAnalysis['color'],
+                          ),
+                        ),
+                        child: Text(
+                          personalityAnalysis['name'],
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: personalityAnalysis['color'],
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      // Kişilik açıklaması
+                      Text(
+                        personalityAnalysis['description'],
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.black87,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      // Özellikler
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.grey.shade300),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Yönetici Özellikleri:",
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey.shade700,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Wrap(
+                              spacing: 6,
+                              runSpacing: 6,
+                              children: (personalityAnalysis['traits'] as List<String>)
+                                  .map(
+                                    (trait) => Chip(
+                                      label: Text(
+                                        trait,
+                                        style: const TextStyle(fontSize: 12),
+                                      ),
+                                      backgroundColor: personalityAnalysis['color'].withValues(alpha: 0.2),
+                                      side: BorderSide(
+                                        color: personalityAnalysis['color'].withValues(alpha: 0.2),
+                                      ),
+                                    ),
+                                  )
+                                  .toList(),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                
+                // Danışman istatistikleri
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.amber.shade300),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        "Danışman Tercihleri",
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.amber.shade800,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      _buildAdvisorUsageStats(),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [],
+        );
+      },
+    );
+  }
+  
+  // Danışman kullanım istatistiklerini görselleştiren widget
+  Widget _buildAdvisorUsageStats() {
+    final advisorInfo = GameData.getAdvisorInfo();
+    final totalUsage = gameState.advisorUsageCount.values.fold<int>(0, (sum, count) => sum + count);
+    
+    if (totalUsage == 0) {
+      return const Text(
+        "Henüz hiçbir danışman kullanılmadı.",
+        style: TextStyle(fontStyle: FontStyle.italic),
+      );
+    }
+    
+    List<Widget> stats = [];
+    
+    gameState.advisorUsageCount.forEach((type, count) {
+      if (count > 0) {
+        final advisor = advisorInfo[type] ?? 
+            {"name": "Bilinmeyen", "icon": Icons.person, "color": Colors.grey};
+        
+        double percentage = count / totalUsage * 100;
+        
+        stats.add(
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Icon(advisor["icon"], color: advisor["color"], size: 16),
+                    const SizedBox(width: 8),
+                    Text(
+                      "${advisor["name"]}: ",
+                      style: TextStyle(color: advisor["color"]),
+                    ),
+                    Text(
+                      "$count kez (${"${percentage.toStringAsFixed(1)}%"})",
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: percentage / 100,
+                    minHeight: 8,
+                    backgroundColor: Colors.grey.shade300,
+                    valueColor: AlwaysStoppedAnimation<Color>(advisor["color"]),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+    });
+    
+    return Column(children: stats);
   }
 }
