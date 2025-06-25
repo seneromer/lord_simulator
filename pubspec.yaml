@@ -5,13 +5,14 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.8.1
-  flutter: ">=3.19.0"
+  sdk: '>=3.8.1 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
+  audioplayers: ^6.1.0
+  shared_preferences: ^2.2.2
 
 dev_dependencies:
   flutter_test:
@@ -28,6 +29,8 @@ flutter:
     - city/olaylar/
     - events/
     - icon/
+    - assets/music/
+    - music/
 
 # Launcher Icons Configuration
 flutter_launcher_icons:

@@ -691,7 +691,7 @@ class GameData {
         "Bu krizde sabırlı olmak ve müzakere etmek gerekir.",
         "Düşmanınızı anlamak, onu yenmekten daha önemlidir.",
         "Güçlü ittifaklar, büyük orduları bile geçer.",
-        "Diplomaside sabır ve zeka en önemli silahlarınızdır.",
+        "Diplomasi ve sabır, bu durumda en iyi silahlarınızdır.",
         "Bir anlaşma iki tarafı da memnun etmelidir.",
         "Söz gümüşse, sükût altındır, Majeste.",
         "Dostluk para ile satın alınamaz ama diplomasi ile kazanılır.",
@@ -1209,5 +1209,182 @@ class GameData {
     );
 
     return allEvents;
+  }
+
+  // Öğretici (tutorial) kartları - oyunun başında gösterilir
+  static List<EventCard> getTutorialEvents() {
+    return [
+      EventCard(
+        title: "Hoş Geldiniz, Yeni Lider! (Eğitim)",
+        description: "Küçük bir köyün lideri olarak başlıyorsunuz. Dört temel kaynak var: Halk, Din, Asker ve Ekonomi. Her karar bu değerleri etkiler.",
+        imagePath: "city/olaylar/kopru_insasi.jpg",
+        governmentLevels: ["köy"],
+        durationInDays: 30,
+        choices: [
+          Choice(
+            title: "Halk Danışmanı",
+            description: "Köylülerin nabzını tutar. Onun tavsiyeleri halkın memnuniyetini artırırım.",
+            advisorType: "halk",
+            // Eğitim kartları hiçbir statı etkilemez
+            halkChange: 0,
+            dinChange: 0,
+            askerChange: 0,
+            ekonomiChange: 0,
+          ),
+          Choice(
+            title: "Mali Danışman",
+            description: "Hazine ve ticaret uzmanıdır. Ekonomik kararları o yönetirim.",
+            advisorType: "mali",
+            halkChange: 0,
+            dinChange: 0,
+            askerChange: 0,
+            ekonomiChange: 0,
+          ),
+          Choice(
+            title: "Askeri Danışman",
+            description: "Güvenlik ve ordu uzmanıyım. Güç gösterisi gerektiğinde tavsiyelerimi dinleyin.",
+            advisorType: "askeri",
+            halkChange: 0,
+            dinChange: 0,
+            askerChange: 0,
+            ekonomiChange: 0,
+          ),
+        ],
+      ),
+
+      EventCard(
+        title: "Danışmanları Tanıyalım (Eğitim)",
+        description: "Her danışman farklı bir alanda uzmandır. Din Danışmanı manevi işlerde, Diplomatik Danışman dış ilişkilerde uzmandır.",
+        imagePath: "city/olaylar/din_adamlari_isyani.jpg",
+        governmentLevels: ["köy"],
+        durationInDays: 30,
+        choices: [
+          Choice(
+            title: "Din Danışmanı",
+            description: "Kutsal kitapların bilgini ve halkın ruhsal lideriyim. Manevi güç sağlarım.",
+            advisorType: "din",
+            halkChange: 0,
+            dinChange: 0,
+            askerChange: 0,
+            ekonomiChange: 0,
+          ),
+          Choice(
+            title: "Diplomatik Danışman",
+            description: "Dış ilişkiler uzmanıyım. Barış ve anlaşmaların mimarıyım.",
+            advisorType: "diplomatik",
+            halkChange: 0,
+            dinChange: 0,
+            askerChange: 0,
+            ekonomiChange: 0,
+          ),
+        ],
+      ),
+
+      EventCard(
+        title: "Kaynakları Yönetmek (Eğitim)",
+        description: "Dengeyi korumak çok önemlidir. Her seviyede maksimum değerler farklıdır.",
+        imagePath: "city/olaylar/kuraklik.jpg",
+        governmentLevels: ["köy"],
+        durationInDays: 30,
+        choices: [
+          Choice(
+            title: "Halk Kaynağı Hakkında",
+            description: "Halkı kızdırırsan isyan ederler.Fazla desteklersen kontrolü ele geçirirler!",
+            advisorType: "halk",
+            halkChange: 0,
+            dinChange: 0,
+            askerChange: 0,
+            ekonomiChange: 0,
+          ),
+          Choice(
+            title: "Din Kaynağı Hakkında",
+            description: "Dini çevreyi desteklemezsen aforoz edilirsiniz. Aşırı destekte ise teokrasi kurulur.",
+            advisorType: "din",
+            halkChange: 0,
+            dinChange: 0,
+            askerChange: 0,
+            ekonomiChange: 0,
+          ),
+          Choice(
+            title: "Asker Hakkında",
+            description: "Orduyu desteklemezsen savunmasız kalırsınız, Aşırı destek darbe getirir.",
+            advisorType: "askeri",
+            halkChange: 0,
+            dinChange: 0,
+            askerChange: 0,
+            ekonomiChange: 0,
+          ),
+        ],
+      ),
+
+      EventCard(
+        title: "Oyun İpuçları (Eğitim)",
+        description: "Son eğitim kartı! Oyunu kazanmak için bazı ipuçları: Dengeyi koruyun, seviye atlama koşullarını kontrol edin ve zincirleme olayları takip edin.",
+        imagePath: "city/kingdom.jpg",
+        governmentLevels: ["köy"],
+        durationInDays: 30,
+        choices: [
+          Choice(
+            title: "Seviye Sistemi",
+            description: "Köy → Derebeylik → Baronluk → Krallık → İmparatorluk.",
+            advisorType: "diplomatik",
+            halkChange: 0,
+            dinChange: 0,
+            askerChange: 0,
+            ekonomiChange: 0,
+          ),
+          Choice(
+            title: "Seviye Atlama Koşulları",
+            description: "Üst kısımdaki seviye çubuğuna tıklayarak detayları görebilirsiniz.",
+            advisorType: "mali",
+            halkChange: 0,
+            dinChange: 0,
+            askerChange: 0,
+            ekonomiChange: 0,
+          ),
+          Choice(
+            title: "Emeklilik",
+            description: "İmparatorluk seviyesinde tüm değerleriniz 50'nin üzerindeyse başarılı bir şekilde yönetimi devredebilirsiniz",
+            advisorType: "halk",
+            halkChange: 0,
+            dinChange: 0,
+            askerChange: 0,
+            ekonomiChange: 0,
+          ),
+        ],
+      ),
+    ];
+  }
+
+  // Öğretici başlatma kartı - oyunun ilk kartı
+  static EventCard getTutorialStartCard() {
+    return EventCard(
+      title: "Yeni Bir Liderlik Yolculuğu",
+      description: "Küçük bir köyün lideri olmak üzeresiniz. Bu zorlu görevde size yardımcı olacak danışmanlarınız var. Yönetim konularında rehberlik almak ister misiniz?",
+      imagePath: "city/olaylar/kopru_insasi.jpg",
+      governmentLevels: ["köy"],
+      durationInDays: 0, // Bu kart zamanı etkilemez
+      choices: [
+        Choice(
+          title: "Evet, Rehberlik İstiyorum",
+          description: "Danışmanlarım bana yönetim konularında eğitim versin. Oyun mekaniklerini öğrenmek istiyorum.",
+          advisorType: "halk",
+          // Bu kart hiçbir statı etkilemez
+          halkChange: 0,
+          dinChange: 0,
+          askerChange: 0,
+          ekonomiChange: 0,
+        ),
+        Choice(
+          title: "Hayır, Doğrudan Başlayalım",
+          description: "Oyun mekaniklerini biliyorum. Hemen gerçek olaylarla yönetim görevlerime başlamak istiyorum.",
+          advisorType: "mali",
+          halkChange: 0,
+          dinChange: 0,
+          askerChange: 0,
+          ekonomiChange: 0,
+        ),
+      ],
+    );
   }
 }
