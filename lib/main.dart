@@ -3326,11 +3326,11 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin, 
                         ),
                       ),
               ),
-            ],
-          ),
+            ],          ),
         ),
       ),
-    );  }
+    );
+  }
   
   // Uygulama yaşam döngüsü değiştiğinde çağrılacak metod
   @override
@@ -3509,12 +3509,13 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin, 
                     left: 0,
                     top: 0,
                     child: IconButton(
-                      icon: const Icon(Icons.arrow_back),
-                      onPressed: () {
+                      icon: const Icon(Icons.arrow_back),                      onPressed: () {
                         Navigator.of(context).pop(); // Önce ayarlar dialogunu kapat
                         // Kısa bir gecikme ile level info popup'ı göster
                         Future.delayed(const Duration(milliseconds: 100), () {
-                          _showLevelInfoPopup(context);
+                          if (mounted) {
+                            _showLevelInfoPopup(context);
+                          }
                         });
                       },
                       padding: EdgeInsets.zero,
@@ -3547,18 +3548,20 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin, 
               ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Müzik ayarı
+                children: [                  // Müzik ayarı
                   SwitchListTile(
                     title: const Text('Müzik'),
-                    value: AudioSettings.isMusicEnabled,                    onChanged: (bool value) async {
+                    value: AudioSettings.isMusicEnabled,
+                    onChanged: (bool value) async {
+                      // Ayarı kaydet
+                      await AudioSettings.saveMusicSetting(value);
+                      
                       // Dialog state'ini güncelle
-                      setDialogState(() {
-                        AudioSettings.isMusicEnabled = value;
-                      });                      // Ana state'i güncelle
-                      setState(() {
-                        AudioSettings.isMusicEnabled = value;
-                      });
+                      setDialogState(() {});
+                      
+                      // Ana state'i güncelle
+                      setState(() {});
+                      
                       if (value) {
                         await _audioService.startBackgroundMusic();
                       } else {
@@ -3755,12 +3758,13 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin, 
                 left: 0,
                 top: 0,
                 child: IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: () {
+                  icon: const Icon(Icons.arrow_back),                  onPressed: () {
                     Navigator.of(context).pop();
                     // Kısa bir gecikme ile level info popup'ı göster
                     Future.delayed(const Duration(milliseconds: 100), () {
-                      _showLevelInfoPopup(context);
+                      if (mounted) {
+                        _showLevelInfoPopup(context);
+                      }
                     });
                   },
                   padding: EdgeInsets.zero,
