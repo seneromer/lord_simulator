@@ -1914,11 +1914,15 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin, 
           ),          actions: [
             // Devam Et Butonu
             SizedBox(
-              width: double.infinity,              child: ElevatedButton.icon(
-                onPressed: () {
+              width: double.infinity,              child: ElevatedButton.icon(                onPressed: () async {
                   // Seviye atlama sonrası oyunu kaydet
                   GameState.saveGame(gameState);
                   Navigator.of(context).pop();
+                  
+                  // Müzik ayarı açıksa müziği yeniden başlat
+                  if (AudioSettings.isMusicEnabled) {
+                    await _audioService.startBackgroundMusic();
+                  }
                 },
                 icon: const Icon(Icons.check, color: Colors.white),
                 label: const Text(
@@ -2421,8 +2425,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin, 
           ),
           actions: [
             SizedBox(
-              width: double.infinity,              child: ElevatedButton.icon(
-                onPressed: () async {
+              width: double.infinity,              child: ElevatedButton.icon(                onPressed: () async {
                   // Kaydedilmiş oyunu sil
                   await GameState.deleteSavedGame();
                   
@@ -2431,6 +2434,11 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin, 
                     gameState = GameState();
                     _selectRandomEvent();
                   });
+                  
+                  // Müzik ayarı açıksa müziği yeniden başlat
+                  if (AudioSettings.isMusicEnabled) {
+                    await _audioService.startBackgroundMusic();
+                  }
                 },
                 icon: const Icon(Icons.refresh, color: Colors.white),
                 label: const Text(
