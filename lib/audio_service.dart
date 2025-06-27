@@ -64,14 +64,19 @@ class AudioService {
   Future<void> initialize() async {
     // Newer audioplayers version doesn't need setPlayerMode
     // Just initialize the player
-  }
-  // Arkaplan müziği başlatma fonksiyonu
+  }  // Arkaplan müziği başlatma fonksiyonu
   Future<void> startBackgroundMusic() async {
     // Müzik ayarı kapalı ise çalma
     if (!AudioSettings.isMusicEnabled) {
       return;
     }
-      try {
+    
+    try {
+      // Eğer müzik zaten çalıyorsa, yeniden başlatma
+      if (_backgroundMusicPlayer.state == PlayerState.playing) {
+        return;
+      }
+      
       await _backgroundMusicPlayer.setReleaseMode(ReleaseMode.loop);
       await _backgroundMusicPlayer.setVolume(0.1); // Ses seviyesi %10'a düşürüldü
       // Play the background music with AssetSource
@@ -88,8 +93,7 @@ class AudioService {
     } catch (e) {
       // Hata durumunda sessizce devam et
     }
-  }
-  // Başarısızlık sesi çal (oyun bittiğinde)
+  }  // Başarısızlık sesi çal (oyun bittiğinde)
   Future<void> playFailureSound() async {
     // Ses efektleri ayarı kapalı ise çalma
     if (!AudioSettings.isSoundEffectsEnabled) {
@@ -102,14 +106,14 @@ class AudioService {
       await failurePlayer.play(AssetSource('music/basarisizlik_sesi.mp3'));
       
       // Ses bittikten sonra player'ı dispose et
-      failurePlayer.onPlayerComplete.listen((event) {
+      failurePlayer.onPlayerComplete.listen((event) async {
         failurePlayer.dispose();
+        // Oyun bitti durumunda müzik zaten durduruluyor, bu yüzden yeniden başlatma
       });
     } catch (e) {
       // Hata durumunda sessizce devam et
     }
   }
-
   // Seviye atlama sesi çal
   Future<void> playLevelUpSound() async {
     // Ses efektleri ayarı kapalı ise çalma
@@ -122,9 +126,14 @@ class AudioService {
       await levelUpPlayer.setVolume(0.4); // Ses seviyesi %40
       await levelUpPlayer.play(AssetSource('music/seviye_sesi.mp3'));
       
-      // Ses bittikten sonra player'ı dispose et
-      levelUpPlayer.onPlayerComplete.listen((event) {
+      // Ses bittikten sonra player'ı dispose et ve arkaplan müziğini yeniden başlat
+      levelUpPlayer.onPlayerComplete.listen((event) async {
         levelUpPlayer.dispose();
+        // Arkaplan müziğinin devam etmesini sağla
+        if (AudioSettings.isMusicEnabled) {
+          await Future.delayed(const Duration(milliseconds: 100));
+          await startBackgroundMusic();
+        }
       });
     } catch (e) {
       // Hata durumunda sessizce devam et
