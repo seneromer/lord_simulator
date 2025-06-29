@@ -27,6 +27,7 @@ flutter:
     - card/
     - city/
     - city/olaylar/
+    - city/olaylar/karisik/
     - events/
     - icon/
     - assets/music/

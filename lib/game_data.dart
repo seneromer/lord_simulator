@@ -101,6 +101,7 @@ class GameData {
       EventCard(
         title: "Köy Okulunun Açılması",
         description: "Köy okulunun açılması için bütçe ayrılması isteniyor.",
+        imagePath: "city/olaylar/karisik/17.jpg",
         governmentLevels: ["köy"],
         durationInDays: 365, // 1 yıl süren büyük proje
         choices: [
@@ -134,6 +135,7 @@ class GameData {
       EventCard(
         title: "Yabani Hayvan Saldırısı",
         description: "Vahşi kurtlar köylülere ve sürülerine saldırıyor.",
+        imagePath: "city/olaylar/karisik/2.jpg",
         governmentLevels: ["köy"],
         durationInDays: 45, // 1.5 ay süren acil durum
         choices: [
@@ -165,6 +167,7 @@ class GameData {
       EventCard(
         title: "Köy Çınarının Kesilmesi",
         description: "Köyün 300 yıllık çınar ağacı hasta oldu.",
+        imagePath: "city/olaylar/karisik/3.jpg",
         governmentLevels: ["köy"],
         choices: [
           Choice(
@@ -197,6 +200,7 @@ class GameData {
       EventCard(
         title: "Köv Festivali Organizasyonu",
         description: "Köylüler hasat festivali düzenlemek istiyor.",
+        imagePath: "city/olaylar/karisik/4.jpg",
         governmentLevels: ["köy"],
         durationInDays: 15, // 15 günlük festival hazırlığı
         choices: [
@@ -227,6 +231,7 @@ class GameData {
       EventCard(
         title: "Köprü Yapım İhtiyacı",
         description: "Köyü ikiye bölen dere taştığında köprü gerekiyor.",
+        imagePath: "city/olaylar/karisik/5.jpg",
         governmentLevels: ["köy"],
         durationInDays: 240, // 8 ay süren inşaat projesi
         choices: [
@@ -260,6 +265,7 @@ class GameData {
       EventCard(
         title: "Gezgin Tüccarın Teklifi",
         description: "Gezgin tüccar köyde dükkân açmak istiyor.",
+        imagePath: "city/olaylar/karisik/6.jpg",
         governmentLevels: ["köy"],
         choices: [
           Choice(
@@ -327,6 +333,7 @@ class GameData {
       EventCard(
         title: "Sınır Anlaşmazlığı",
         description: "Komşu derebeyiyle aranızda sınır anlaşmazlığı çıktı.",
+        imagePath: "city/olaylar/karisik/7.jpg",
         governmentLevels: ["derebeylik"],
         choices: [
           Choice(
@@ -360,6 +367,7 @@ class GameData {
       EventCard(
         title: "Kristal Madeni Keşfi",
         description: "Dağlarda değerli kristal madeni bulundu.",
+        imagePath: "city/olaylar/karisik/8.jpg",
         governmentLevels: ["baronluk"],
         choices: [
           Choice(
@@ -428,6 +436,7 @@ class GameData {
       EventCard(
         title: "Antik İmparatorluk Kalıntıları",
         description: "Arkeologlar antik imparatorluğun kalıntılarını keşfetti.",
+        imagePath: "city/olaylar/karisik/9.jpg",
         governmentLevels: ["imparatorluk"],
         choices: [
           Choice(
@@ -464,6 +473,7 @@ class GameData {
       EventCard(
         title: "Ticaret Krizi",
         description: "Ana ticaret yolları kesildi ve ekonomi sarsıldı.",
+        imagePath: "city/olaylar/karisik/10.jpg",
         governmentLevels: ["köy", "derebeylik"],
         choices: [
           Choice(
@@ -498,6 +508,7 @@ class GameData {
       EventCard(
         title: "Gizemli Hastalık",
         description: "Şehirde gizemli bir hastalık yayılmaya başladı.",
+        imagePath: "city/olaylar/karisik/11.jpg",
         governmentLevels: ["köy", "derebeylik"],
         choices: [
           Choice(
@@ -530,6 +541,7 @@ class GameData {
       EventCard(
         title: "Ejder Efsanesi",
         description: "Dağlarda büyük bir ejderin uyandığı söyleniyor.",
+        imagePath: "city/olaylar/karisik/12.jpg",
         governmentLevels: ["derebeylik"],
         choices: [
           Choice(
@@ -562,6 +574,7 @@ class GameData {
       EventCard(
         title: "Gizli Hazine",
         description: "Eski çiftçi gizli hazine haritası getirdi.",
+        imagePath: "city/olaylar/karisik/13.jpg",
         governmentLevels: ["köy"],
         choices: [
           Choice(

@@ -58,100 +58,110 @@ class AudioService {
   static final AudioService _instance = AudioService._internal();
   factory AudioService() => _instance;
   AudioService._internal();
-  // AudioPlayer instance'ları
-  final AudioPlayer _backgroundMusicPlayer = AudioPlayer();
-    // Initialization
+  // AudioPlayer instance'ı artık nullable
+  AudioPlayer? _backgroundMusicPlayer;
+  bool _isBackgroundMusicPlaying = false;
+  bool _isInitialized = false;
+
+  // Initialization
   Future<void> initialize() async {
-    // Newer audioplayers version doesn't need setPlayerMode
-    // Just initialize the player
-  }  // Arkaplan müziği başlatma fonksiyonu
+    if (_isInitialized && _backgroundMusicPlayer != null) return;
+
+    // Önce eski player dispose edilmişse yeni bir tane oluştur
+    _backgroundMusicPlayer?.dispose();
+    _backgroundMusicPlayer = AudioPlayer();
+
+    // Background music player ayarları
+    await _backgroundMusicPlayer!.setReleaseMode(ReleaseMode.loop);
+    await _backgroundMusicPlayer!.setVolume(0.1);
+
+    _isInitialized = true;
+  }
+  // Arkaplan müziği başlatma fonksiyonu
   Future<void> startBackgroundMusic() async {
     // Müzik ayarı kapalı ise çalma
     if (!AudioSettings.isMusicEnabled) {
       return;
     }
-    
+
+    if (!_isInitialized || _backgroundMusicPlayer == null) {
+      await initialize();
+    }
+
     try {
       // Eğer müzik zaten çalıyorsa, yeniden başlatma
-      if (_backgroundMusicPlayer.state == PlayerState.playing) {
+      if (_backgroundMusicPlayer!.state == PlayerState.playing) {
+        _isBackgroundMusicPlaying = true;
         return;
       }
-      
-      await _backgroundMusicPlayer.setReleaseMode(ReleaseMode.loop);
-      await _backgroundMusicPlayer.setVolume(0.1); // Ses seviyesi %10'a düşürüldü
-      // Play the background music with AssetSource
-      await _backgroundMusicPlayer.play(AssetSource('music/arkaplan_ses.mp3'));
+
+      // Müziği başlat
+      await _backgroundMusicPlayer!.play(AssetSource('music/arkaplan_ses.mp3'));
+      _isBackgroundMusicPlaying = true;
     } catch (e) {
       // Hata durumunda sessizce devam et
+      _isBackgroundMusicPlaying = false;
     }
   }
-
   // Arkaplan müziğini durdur
   Future<void> stopBackgroundMusic() async {
     try {
-      await _backgroundMusicPlayer.stop();
+      await _backgroundMusicPlayer?.stop();
+      _isBackgroundMusicPlaying = false;
     } catch (e) {
       // Hata durumunda sessizce devam et
-    }
-  }  // Başarısızlık sesi çal (oyun bittiğinde)
-  Future<void> playFailureSound() async {
-    // Ses efektleri ayarı kapalı ise çalma
-    if (!AudioSettings.isSoundEffectsEnabled) {
-      return;
-    }
-    
-    try {
-      final AudioPlayer failurePlayer = AudioPlayer();
-      await failurePlayer.setVolume(0.3); // Ses seviyesi %30
-      await failurePlayer.play(AssetSource('music/basarisizlik_sesi.mp3'));
-      
-      // Ses bittikten sonra player'ı dispose et
-      failurePlayer.onPlayerComplete.listen((event) async {
-        failurePlayer.dispose();
-        // Oyun bitti durumunda müzik zaten durduruluyor, bu yüzden yeniden başlatma
-      });
-    } catch (e) {
-      // Hata durumunda sessizce devam et
+      _isBackgroundMusicPlaying = false;
     }
   }
-  // Seviye atlama sesi çal
-  Future<void> playLevelUpSound() async {
-    // Ses efektleri ayarı kapalı ise çalma
+  Future<void> playFailureSound() async {
     if (!AudioSettings.isSoundEffectsEnabled) {
       return;
     }
-    
     try {
-      final AudioPlayer levelUpPlayer = AudioPlayer();
-      await levelUpPlayer.setVolume(0.4); // Ses seviyesi %40
-      await levelUpPlayer.play(AssetSource('music/seviye_sesi.mp3'));
-      
-      // Ses bittikten sonra player'ı dispose et ve arkaplan müziğini yeniden başlat
-      levelUpPlayer.onPlayerComplete.listen((event) async {
-        levelUpPlayer.dispose();
-        // Arkaplan müziğinin devam etmesini sağla
-        if (AudioSettings.isMusicEnabled) {
-          await Future.delayed(const Duration(milliseconds: 100));
-          await startBackgroundMusic();
-        }
+      final AudioPlayer failurePlayer = AudioPlayer();
+      await failurePlayer.setVolume(0.3);
+      await failurePlayer.play(AssetSource('music/basarisizlik_sesi.mp3'));
+      failurePlayer.onPlayerComplete.listen((event) async {
+        await failurePlayer.dispose();
       });
     } catch (e) {
       // Hata durumunda sessizce devam et
     }
   }
 
+  Future<void> playLevelUpSound() async {
+    if (!AudioSettings.isSoundEffectsEnabled) {
+      return;
+    }
+    try {
+      final AudioPlayer levelUpPlayer = AudioPlayer();
+      await levelUpPlayer.setVolume(0.4);
+      await levelUpPlayer.play(AssetSource('music/seviye_sesi.mp3'));
+      levelUpPlayer.onPlayerComplete.listen((event) async {
+        await levelUpPlayer.dispose();
+      });
+    } catch (e) {
+      // Hata durumunda sessizce devam et
+    }
+  }
   // Müzik durumunu kontrol et ve güncelle
   Future<void> controlBackgroundMusic() async {
     if (AudioSettings.isMusicEnabled) {
-      // Müzik çalmıyorsa başlat
-      await startBackgroundMusic();
+      // Müzik ayarı açık ama çalmıyorsa başlat
+      if (!_isBackgroundMusicPlaying || _backgroundMusicPlayer == null || _backgroundMusicPlayer!.state != PlayerState.playing) {
+        await startBackgroundMusic();
+      }
     } else {
-      // Müzik çalıyorsa durdur
+      // Müzik ayarı kapalıysa durdur
       await stopBackgroundMusic();
     }
   }
+
   // Dispose - kaynak temizleme
   void dispose() {
-    _backgroundMusicPlayer.dispose();
+    _backgroundMusicPlayer?.dispose();
+    _backgroundMusicPlayer = null;
+    _isBackgroundMusicPlaying = false;
+    _isInitialized = false;
   }
 }

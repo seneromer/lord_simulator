@@ -1914,15 +1914,11 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin, 
           ),          actions: [
             // Devam Et Butonu
             SizedBox(
-              width: double.infinity,              child: ElevatedButton.icon(                onPressed: () async {
+              width: double.infinity,              child: ElevatedButton.icon(
+                onPressed: () {
                   // Seviye atlama sonrası oyunu kaydet
                   GameState.saveGame(gameState);
                   Navigator.of(context).pop();
-                  
-                  // Müzik ayarı açıksa müziği yeniden başlat
-                  if (AudioSettings.isMusicEnabled) {
-                    await _audioService.startBackgroundMusic();
-                  }
                 },
                 icon: const Icon(Icons.check, color: Colors.white),
                 label: const Text(
@@ -2425,7 +2421,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin, 
           ),
           actions: [
             SizedBox(
-              width: double.infinity,              child: ElevatedButton.icon(                onPressed: () async {
+              width: double.infinity,              child: ElevatedButton.icon(
+                onPressed: () async {
                   // Kaydedilmiş oyunu sil
                   await GameState.deleteSavedGame();
                   
@@ -2434,11 +2431,6 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin, 
                     gameState = GameState();
                     _selectRandomEvent();
                   });
-                  
-                  // Müzik ayarı açıksa müziği yeniden başlat
-                  if (AudioSettings.isMusicEnabled) {
-                    await _audioService.startBackgroundMusic();
-                  }
                 },
                 icon: const Icon(Icons.refresh, color: Colors.white),
                 label: const Text(
@@ -3334,11 +3326,11 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin, 
                         ),
                       ),
               ),
-            ],          ),
+            ],
+          ),
         ),
       ),
-    );
-  }
+    );  }
   
   // Uygulama yaşam döngüsü değiştiğinde çağrılacak metod
   @override
@@ -3348,16 +3340,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin, 
     if (state == AppLifecycleState.resumed) {
       _controlBackgroundMusic();
     }
-  }
-  // Müzik durumunu kontrol et ve güncelle
-  void _controlBackgroundMusic() async {    if (AudioSettings.isMusicEnabled) {
-      // Müzik çalmıyorsa başlat
-      await _audioService.startBackgroundMusic();
-    } else {
-      // Müzik çalıyorsa durdur
-      await _audioService.stopBackgroundMusic();
-    }
-  }  @override
+  }  // Müzik durumunu kontrol et ve güncelle
+  void _controlBackgroundMusic() async {
+    await _audioService.controlBackgroundMusic();
+  }@override
   void dispose() {
     // WidgetsBindingObserver'ı kaldır
     WidgetsBinding.instance.removeObserver(this);
@@ -3517,13 +3503,12 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin, 
                     left: 0,
                     top: 0,
                     child: IconButton(
-                      icon: const Icon(Icons.arrow_back),                      onPressed: () {
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: () {
                         Navigator.of(context).pop(); // Önce ayarlar dialogunu kapat
                         // Kısa bir gecikme ile level info popup'ı göster
                         Future.delayed(const Duration(milliseconds: 100), () {
-                          if (mounted) {
-                            _showLevelInfoPopup(context);
-                          }
+                          _showLevelInfoPopup(context);
                         });
                       },
                       padding: EdgeInsets.zero,
@@ -3556,28 +3541,40 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin, 
               ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
-                children: [                  // Müzik ayarı
+                children: [
+                  // Müzik ayarı
                   SwitchListTile(
                     title: const Text('Müzik'),
                     value: AudioSettings.isMusicEnabled,
                     onChanged: (bool value) async {
-                      // Ayarı kaydet
-                      await AudioSettings.saveMusicSetting(value);
-                      
-                      // Dialog state'ini güncelle
-                      setDialogState(() {});
-                      
-                      // Ana state'i güncelle
-                      setState(() {});
-                      
+                      setDialogState(() {
+                        AudioSettings.isMusicEnabled = value;
+                      });
                       if (value) {
                         await _audioService.startBackgroundMusic();
                       } else {
                         await _audioService.stopBackgroundMusic();
                       }
+                      await AudioSettings.saveMusicSetting(value);
                     },
-                    secondary: Icon(                      AudioSettings.isMusicEnabled ? Icons.music_note : Icons.music_off,
+                    secondary: Icon(
+                      AudioSettings.isMusicEnabled ? Icons.music_note : Icons.music_off,
                       color: AudioSettings.isMusicEnabled ? Colors.green : Colors.grey,
+                    ),
+                  ),
+                  // Ses Efektleri ayarı
+                  SwitchListTile(
+                    title: const Text('Ses Efektleri'),
+                    value: AudioSettings.isSoundEffectsEnabled,
+                    onChanged: (bool value) async {
+                      setDialogState(() {
+                        AudioSettings.isSoundEffectsEnabled = value;
+                      });
+                      await AudioSettings.saveSoundEffectsSetting(value);
+                    },
+                    secondary: Icon(
+                      AudioSettings.isSoundEffectsEnabled ? Icons.volume_up : Icons.volume_off,
+                      color: AudioSettings.isSoundEffectsEnabled ? Colors.green : Colors.grey,
                     ),
                   ),
                 ],
@@ -3766,13 +3763,12 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin, 
                 left: 0,
                 top: 0,
                 child: IconButton(
-                  icon: const Icon(Icons.arrow_back),                  onPressed: () {
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () {
                     Navigator.of(context).pop();
                     // Kısa bir gecikme ile level info popup'ı göster
                     Future.delayed(const Duration(milliseconds: 100), () {
-                      if (mounted) {
-                        _showLevelInfoPopup(context);
-                      }
+                      _showLevelInfoPopup(context);
                     });
                   },
                   padding: EdgeInsets.zero,
