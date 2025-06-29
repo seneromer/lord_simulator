@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'game_data.dart';
 import 'audio_service.dart';
+import 'vibration_helper.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -1008,24 +1009,46 @@ class _StartScreenState extends State<StartScreen> {
                 ),
                 
                 const SizedBox(height: 15),
+
+                // Titreşim Açma/Kapatma
+                _buildSettingItem(
+                  icon: Icons.vibration,
+                  title: 'Titreşim',
+                  isToggle: true,
+                  value: AudioSettings.isVibrationEnabled,
+                  onChanged: (value) async {
+                    await AudioSettings.saveVibrationSetting(value);
+                    setDialogState(() {
+                      // UI'yi güncelle
+                    });
+                  },
+                ),
+                const SizedBox(height: 15),
                 
                 // Tutorial Toggle
                 _buildSettingItem(
                   icon: Icons.school,
-                  title: 'Öğreticiyi Tekrar Göster',                  
-                  isToggle: true,
+                  title: 'Öğreticiyi Göster',
+                  isToggle: false,
+                  isEnabled: true,
+                  onTap: () async {
+                    // Kutucuğa tıklanınca tutorial ayarını aç ve tutorial'ı bir sonraki oyun başında gösterilecek şekilde ayarla
+                    await AudioSettings.saveTutorialToggleSetting(true);
+                    GameState.hasEverSeenTutorial = false;
+                    setDialogState(() {
+                      // UI güncellensin
+                    });
+                    // Kullanıcıya bilgi ver
+                    // ignore: use_build_context_synchronously
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Öğretici, oyuna bir sonraki girişte gösterilecek.'),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                  },
+                  subtitle: null,
                   value: AudioSettings.isTutorialToggleEnabled && !GameState.hasEverSeenTutorial,
-                  isEnabled: AudioSettings.isTutorialToggleEnabled,                  onChanged: AudioSettings.isTutorialToggleEnabled ? (value) async {
-                    if (value) {
-                      // Tutorial'ı yeniden aktifleştir
-                      GameState.resetTutorialState();
-                      await AudioSettings.saveTutorialToggleSetting(false); // Butonu pasif yap
-                      
-                      setDialogState(() {
-                        // UI'yi güncelle
-                      });
-                    }
-                  } : null,
                 ),
                 
                 const SizedBox(height: 15),                
@@ -1087,7 +1110,8 @@ class _StartScreenState extends State<StartScreen> {
           width: 1,
         ),
       ),
-      child: Row(        children: [
+      child: Row(
+        children: [
           Icon(
             icon,
             color: isEnabled ? Colors.white70 : Colors.white30,
@@ -1116,7 +1140,8 @@ class _StartScreenState extends State<StartScreen> {
                   ),
               ],
             ),
-          ),if (isToggle)
+          ),
+          if (isToggle)
             Switch(
               value: value,
               onChanged: isEnabled ? onChanged : null,
@@ -1124,6 +1149,20 @@ class _StartScreenState extends State<StartScreen> {
               activeTrackColor: isEnabled ? Colors.white.withOpacity(0.3) : Colors.grey.withOpacity(0.3),
               inactiveThumbColor: Colors.white.withOpacity(isEnabled ? 0.5 : 0.3),
               inactiveTrackColor: Colors.white.withOpacity(0.1),
+            )
+          else if (title == 'Öğreticiyi Göster')
+            GestureDetector(
+              onTap: onTap,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 120),
+                curve: Curves.easeInOut,
+                padding: const EdgeInsets.only(left: 8.0, right: 4.0),
+                child: Icon(
+                  value ? Icons.check_box : Icons.check_box_outline_blank,
+                  color: value ? Colors.greenAccent : Colors.white54,
+                  size: 26,
+                ),
+              ),
             )
           else if (onTap != null)
             GestureDetector(
@@ -1304,7 +1343,8 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin, 
       curve: Curves.easeInOut,
     ));
 
-    // Audio service'i başlat ve arkaplan müziğini çal
+    // Audio service'i başlat ve arkaplan mü
+    //ziğini çal
     Future.delayed(const Duration(milliseconds: 500), () async {
       await _audioService.initialize();      await _audioService.startBackgroundMusic();
     });
@@ -1470,9 +1510,10 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin, 
         return 1.3; // İmparatorlukta en güçlü etki
     }  }  void _executeChoice(Choice choice) {
     // Öğretici seçim kartıysa özel işlem yap
-    if (!gameState.hasShownTutorialChoice) {      setState(() {
+    if (!gameState.hasShownTutorialChoice) {
+      setState(() {
         gameState.hasShownTutorialChoice = true;
-        GameState.hasEverSeenTutorial = true; // Kalıcı olarak öğretici gösterildi işaretle        
+        GameState.hasEverSeenTutorial = true; // Kalıcı olarak öğretici gösterildi işaretle
         if (choice.title == "Evet, Rehberlik İstiyorum") {
           gameState.playerWantsTutorial = true;
         } else {
@@ -1480,18 +1521,18 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin, 
           gameState.isTutorialCompleted = true; // Öğreticiyi atla
         }
       });
-      
       // Tutorial toggle'ı yeniden aktifleştir ve kaydet
       AudioSettings.saveTutorialToggleSetting(true);
-      
       _initializeEvents(); // Kartları yeniden yükle
       _animationController.reset();
       _selectRandomEvent();
       _animationController.forward();
       return;
     }
-   
-    
+
+    // Danışman kartı seçildiğinde titreşim tetikle
+    VibrationHelper.vibrateOnTap();
+
     setState(() {
       // Government level'a göre ölçeklendirilmiş etkiler
       double multiplier = _getEffectMultiplier();
@@ -1654,9 +1695,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin, 
                         textAlign: TextAlign.center,
                       ),
                     ),
-                    
                     const SizedBox(height: 16),
-                    
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(
@@ -1675,9 +1714,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin, 
                             color: Colors.amber.shade400, // Koyu tema üzerinde altın sarısı ikon
                             size: 24,
                           ),
-                          
                           const SizedBox(height: 8),
-                          
                           Text(
                             "Yönetilen Süre:",
                             style: TextStyle(
@@ -1687,9 +1724,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin, 
                             ),
                             textAlign: TextAlign.center,
                           ),
-                          
                           const SizedBox(height: 4),
-                          
                           Text(
                             _formatTimePassed(),
                             style: TextStyle(
@@ -1712,15 +1747,16 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin, 
             // Butonları yatay olarak yan yana gösterilen ikonlu kare butonlar
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: [                // Yeniden Başla Butonu (sadece ikon)
+              children: [
+                // Yeniden Başla Butonu (sadece ikon)
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 10),
                   width: 60,
                   height: 60,
-                  child: ElevatedButton(                    onPressed: () async {
+                  child: ElevatedButton(
+                    onPressed: () async {
                       // Kaydedilmiş oyunu sil
                       await GameState.deleteSavedGame();
-                      
                       Navigator.of(context).pop();
                       // Yeni oyun başlarken sadece game state'i sıfırla, tutorial durumunu koru
                       setState(() {
@@ -1728,7 +1764,6 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin, 
                         _initializeEvents();
                         _selectRandomEvent();
                       });
-                      
                       // Arkaplan müziğini yeniden başlat
                       await _audioService.startBackgroundMusic();
                     },
@@ -1742,22 +1777,19 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin, 
                     child: const Icon(Icons.refresh, color: Colors.white, size: 30),
                   ),
                 ),
-                
                 // Ana Sayfaya Dön Butonu (sadece ikon)
                 Container(
                   margin: const EdgeInsets.symmetric(horizontal: 10),
                   width: 60,
-                  height: 60,                  child: ElevatedButton(
+                  height: 60,
+                  child: ElevatedButton(
                     onPressed: () async {
                       // Kaydedilmiş oyunu sil
                       await GameState.deleteSavedGame();
-                      
                       // Audio service'i durdur
                       _audioService.stopBackgroundMusic();
-                      
                       // Tutorial durumunu sıfırlama - kullanıcı bir kez gördüyse tekrar gösterme
                       // GameState.resetTutorialState();
-                      
                       Navigator.of(context).pop();
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
@@ -1773,6 +1805,49 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin, 
                       ),
                     ),
                     child: const Icon(Icons.home, color: Colors.white, size: 30),
+                  ),
+                ),
+                // Kaldığın Yerden Devam Et (Reklamlı) Butonu
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 10),
+                  width: double.infinity,
+                  height: 48,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return ElevatedButton(
+                        onPressed: () {
+                          // Reklam izleme ve devam etme işlemi burada olacak (şimdilik sadece uyarı)
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Row(
+                                children: [
+                                  Icon(Icons.ondemand_video, color: Colors.amber.shade700),
+                                  const SizedBox(width: 8),
+                                  const Text('Reklam izleme özelliği yakında eklenecek!'),
+                                ],
+                              ),
+                              duration: const Duration(seconds: 2),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orange.shade700, // Reklam için turuncu
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          elevation: 6,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.favorite, color: Colors.white, size: 32),
+                            const SizedBox(width: 12),
+                            Icon(Icons.ondemand_video, color: Colors.amber, size: 22),
+                          ],
+                        ),
+                      );
+                    },
                   ),
                 ),
               ],
@@ -2879,8 +2954,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin, 
         double screenWidth = MediaQuery.of(context).size.width;
         double barWidth = screenWidth < 600 ? 50 : 60;
         double barHeight = screenWidth < 600 ? 6 : 8;
-        double labelFontSize = screenWidth < 600 ? 10 : 12;
-        double valueFontSize = screenWidth < 600 ? 8 : 10;
+        // Yazı boyutlarını büyütüyoruz:
+        double labelFontSize = screenWidth < 600 ? 14 : 16;
+        double valueFontSize = screenWidth < 600 ? 15 : 18;
 
         return Column(
           children: [
@@ -2897,7 +2973,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin, 
               width: barWidth,
               height: barHeight,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.3),
+                color: color.withOpacity(0.3),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: FractionallySizedBox(
@@ -2913,8 +2989,9 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin, 
             ),
             Text(
               '$value/$maxValue',
-              style: TextStyle(color: Colors.white, fontSize: valueFontSize),
-            ),          ],
+              style: TextStyle(color: Colors.white, fontSize: valueFontSize, fontWeight: FontWeight.bold),
+            ),
+          ],
         );
       },
     );
@@ -3198,7 +3275,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin, 
                           Text(
                             "Mevcut Seviye",
                             style: TextStyle(
-                              fontSize: 10,
+                              fontSize: 11,
                               color: Colors.grey.shade600,
                               fontWeight: FontWeight.w500,
                             ),
@@ -3206,7 +3283,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin, 
                           Text(
                             gameState.level.name,
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: 17,
                               fontWeight: FontWeight.bold,
                               color: Colors.amber.shade800,
                             ),
@@ -3227,7 +3304,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin, 
                     Text(
                       "${gameState.totalDays}",
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: 17,
                         fontWeight: FontWeight.bold,
                         color: Colors.blue.shade700,
                       ),
@@ -3235,7 +3312,7 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin, 
                     Text(
                       "Gün Yönetildi",
                       style: TextStyle(
-                        fontSize: 10,
+                        fontSize: 11,
                         color: Colors.grey.shade600,
                         fontWeight: FontWeight.w500,
                       ),
@@ -3459,6 +3536,15 @@ class _GameScreenState extends State<GameScreen> with TickerProviderStateMixin, 
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                // Poşet ikonu (varsa) veya para/kese ikonu
+                Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: Icon(
+                    Icons.shopping_bag, // Poşet ikonu (Flutter Material Icons)
+                    color: Colors.amber.shade700,
+                    size: 24,
+                  ),
+                ),
                 // İstatistik butonu (yalnızca ikon)
                 IconButton(
                   icon: const Icon(Icons.insights),

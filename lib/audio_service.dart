@@ -3,6 +3,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 // Global ses ayarları
 class AudioSettings {
+  static bool isVibrationEnabled = true;
+
+  static Future<void> saveVibrationSetting(bool enabled) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      isVibrationEnabled = enabled;
+      await prefs.setBool('vibration_enabled', enabled);
+    } catch (e) {
+      print('Titreşim ayarı kaydedilemedi: $e');
+    }
+  }
   static bool isMusicEnabled = true;
   static bool isSoundEffectsEnabled = true; // Ses efektleri toggle'ı
   static bool isTutorialToggleEnabled = true; // Tutorial toggle butonu aktif mi?
@@ -14,6 +25,7 @@ class AudioSettings {
       isMusicEnabled = prefs.getBool('music_enabled') ?? true;
       isSoundEffectsEnabled = prefs.getBool('sound_effects_enabled') ?? true;
       isTutorialToggleEnabled = prefs.getBool('tutorial_toggle_enabled') ?? true;
+      isVibrationEnabled = prefs.getBool('vibration_enabled') ?? true;
     } catch (e) {
       print('Ayarlar yüklenemedi: $e');
     }
@@ -71,7 +83,22 @@ class AudioService {
     _backgroundMusicPlayer?.dispose();
     _backgroundMusicPlayer = AudioPlayer();
 
-    // Background music player ayarları
+    // 7.x ile: Arka plan müziği için context ayarla (mixWithOthers)
+    await _backgroundMusicPlayer!.setAudioContext(
+      AudioContext(
+        android: AudioContextAndroid(
+          isSpeakerphoneOn: false,
+          stayAwake: false,
+          contentType: AndroidContentType.music,
+          usageType: AndroidUsageType.media,
+          audioFocus: AndroidAudioFocus.gain,
+        ),
+        iOS: AudioContextIOS(
+          category: AVAudioSessionCategory.playback,
+          options: {AVAudioSessionOptions.mixWithOthers},
+        ),
+      ),
+    );
     await _backgroundMusicPlayer!.setReleaseMode(ReleaseMode.loop);
     await _backgroundMusicPlayer!.setVolume(0.1);
 
@@ -118,7 +145,23 @@ class AudioService {
       return;
     }
     try {
+      // 7.x ile: Efektler için context ayarla (mixWithOthers)
       final AudioPlayer failurePlayer = AudioPlayer();
+      await failurePlayer.setAudioContext(
+        AudioContext(
+          android: AudioContextAndroid(
+            isSpeakerphoneOn: false,
+            stayAwake: false,
+            contentType: AndroidContentType.sonification,
+            usageType: AndroidUsageType.assistanceSonification,
+            audioFocus: AndroidAudioFocus.gainTransientMayDuck,
+          ),
+          iOS: AudioContextIOS(
+            category: AVAudioSessionCategory.playback,
+            options: {AVAudioSessionOptions.mixWithOthers},
+          ),
+        ),
+      );
       await failurePlayer.setVolume(0.3);
       await failurePlayer.play(AssetSource('music/basarisizlik_sesi.mp3'));
       failurePlayer.onPlayerComplete.listen((event) async {
@@ -134,7 +177,23 @@ class AudioService {
       return;
     }
     try {
+      // 7.x ile: Efektler için context ayarla (mixWithOthers)
       final AudioPlayer levelUpPlayer = AudioPlayer();
+      await levelUpPlayer.setAudioContext(
+        AudioContext(
+          android: AudioContextAndroid(
+            isSpeakerphoneOn: false,
+            stayAwake: false,
+            contentType: AndroidContentType.sonification,
+            usageType: AndroidUsageType.assistanceSonification,
+            audioFocus: AndroidAudioFocus.gainTransientMayDuck,
+          ),
+          iOS: AudioContextIOS(
+            category: AVAudioSessionCategory.playback,
+            options: {AVAudioSessionOptions.mixWithOthers},
+          ),
+        ),
+      );
       await levelUpPlayer.setVolume(0.4);
       await levelUpPlayer.play(AssetSource('music/seviye_sesi.mp3'));
       levelUpPlayer.onPlayerComplete.listen((event) async {
